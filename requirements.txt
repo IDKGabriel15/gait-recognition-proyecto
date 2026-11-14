@@ -1,0 +1,13 @@
+torch
+torchvision
+ultralytics
+opencv-python
+onnxruntime
+numpy
+scipy
+scikit-learn
+pyyaml
+tqdm
+einops
+kornia
+

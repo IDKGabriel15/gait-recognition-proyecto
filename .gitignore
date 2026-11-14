@@ -1,0 +1,25 @@
+# Entornos y caché de Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Videos crudos y recortados (respaldar en Drive / HuggingFace Dataset)
+dataset/
+dataset_trimmed/
+*.mp4
+!outputs/visuals/*.png
+
+# Pesos pesados y repos externos
+weights/
+third_party/
+*.pt
+*.onnx
+
+# Salidas pesadas regenerables
+outputs/features/
+outputs/visuals/*.mp4
+
+# Logs temporales y archivos comprimidos
+20261113/
+*.zip
