@@ -1,0 +1,108 @@
+﻿**********************
+Inicio de la transcripción de Windows PowerShell
+Hora de inicio: 20261117182005
+Nombre de usuario: COPPEL\angel.roman
+Usuario RunAs: COPPEL\angel.roman
+Nombre de la configuración: 
+Máquina: OBRCLCN232120 (Microsoft Windows NT 10.0.26200.0)
+Aplicación host: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -Command $env:TEMP = $env:_TEMP; $env:TMP = $env:_TMP; $env:LOCALAPPDATA = $env:_LOCALAPPDATA; try { $OutputEncoding = [System.Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
+import cv2
+cap = cv2.VideoCapture(r'outputs\visuals\test2_DiegoAlonzo_toma09_3cams.mp4')
+cap.set(cv2.CAP_PROP_POS_FRAMES, 120)
+_, frm = cap.read()
+cv2.imwrite(r'outputs\visuals\diego_toma09_mid.png', frm)
+cap.release()
+"
+Id. de proceso: 396048
+PSVersion: 5.1.26100.9711
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9711
+BuildVersion: 10.0.26100.9711
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+**********************
+Hora de inicio del comando: 20261117182005
+**********************
+PS>$env:TEMP = $env:_TEMP; $env:TMP = $env:_TMP; $env:LOCALAPPDATA = $env:_LOCALAPPDATA; try { $OutputEncoding = [System.Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
+import cv2
+cap = cv2.VideoCapture(r'outputs\visuals\test2_DiegoAlonzo_toma09_3cams.mp4')
+cap.set(cv2.CAP_PROP_POS_FRAMES, 120)
+_, frm = cap.read()
+cv2.imwrite(r'outputs\visuals\diego_toma09_mid.png', frm)
+cap.release()
+"
+>> ErrorTerminación(): "Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~."
+**********************
+Inicio de la transcripción de Windows PowerShell
+Hora de inicio: 20261117182005
+Nombre de usuario: COPPEL\angel.roman
+Usuario RunAs: COPPEL\angel.roman
+Nombre de la configuración: 
+Máquina: OBRCLCN232120 (Microsoft Windows NT 10.0.26200.0)
+Aplicación host: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -Command $env:TEMP = $env:_TEMP; $env:TMP = $env:_TMP; $env:LOCALAPPDATA = $env:_LOCALAPPDATA; try { $OutputEncoding = [System.Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
+import cv2
+cap = cv2.VideoCapture(r'outputs\visuals\test2_DiegoAlonzo_toma09_3cams.mp4')
+cap.set(cv2.CAP_PROP_POS_FRAMES, 120)
+_, frm = cap.read()
+cv2.imwrite(r'outputs\visuals\diego_toma09_mid.png', frm)
+cap.release()
+"
+Id. de proceso: 396048
+PSVersion: 5.1.26100.9711
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9711
+BuildVersion: 10.0.26100.9711
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+**********************
+Hora de inicio del comando: 20261117182006
+**********************
+PS>CommandInvocation(Out-String): "Out-String"
+>> EnlaceDeParámetros(Out-String): nombre="InputObject"; valor="Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~."
+Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la 
+consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.
+En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ResourceUnavailable: (:) [], ApplicationFailedException
+    + FullyQualifiedErrorId : NativeCommandFailed
+Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la 
+consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.
+En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ResourceUnavailable: (:) [], ApplicationFailedException
+    + FullyQualifiedErrorId : NativeCommandFailed
+Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la
+consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.
+En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ResourceUnavailable: (:) [], ApplicationFailedException
+    + FullyQualifiedErrorId : NativeCommandFailed
+
+**********************
+Hora de inicio del comando: 20261117182006
+**********************
+PS>$global:?
+False
+**********************
+Fin de la transcripción de Windows PowerShell
+Hora de finalización: 20261117182006
+**********************

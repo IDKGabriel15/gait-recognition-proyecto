@@ -1,0 +1,117 @@
+﻿**********************
+Inicio de la transcripción de Windows PowerShell
+Hora de inicio: 20261117150019
+Nombre de usuario: COPPEL\angel.roman
+Usuario RunAs: COPPEL\angel.roman
+Nombre de la configuración: 
+Máquina: OBRCLCN232120 (Microsoft Windows NT 10.0.26200.0)
+Aplicación host: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -Command $env:TEMP = $env:_TEMP; $env:TMP = $env:_TMP; $env:LOCALAPPDATA = $env:_LOCALAPPDATA; try { $OutputEncoding = [System.Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
+import json, pathlib
+with open('configs/dataset_manifest.json', 'r', encoding='utf-8') as f:
+    m = json.load(f)
+all_subjs = sorted(m['subjects'].keys())
+feat_root = pathlib.Path('outputs/features/subjects')
+done = {d.name for d in feat_root.iterdir() if d.is_dir()} if feat_root.exists() else set()
+todo = [s for s in all_subjs if s not in done]
+print('Total:', len(all_subjs), '| Done:', len(done), '| Todo:', len(todo))
+print('Todo list:', ','.join(todo))
+"
+Id. de proceso: 327216
+PSVersion: 5.1.26100.9711
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9711
+BuildVersion: 10.0.26100.9711
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+**********************
+Hora de inicio del comando: 20261117150019
+**********************
+PS>$env:TEMP = $env:_TEMP; $env:TMP = $env:_TMP; $env:LOCALAPPDATA = $env:_LOCALAPPDATA; try { $OutputEncoding = [System.Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
+import json, pathlib
+with open('configs/dataset_manifest.json', 'r', encoding='utf-8') as f:
+    m = json.load(f)
+all_subjs = sorted(m['subjects'].keys())
+feat_root = pathlib.Path('outputs/features/subjects')
+done = {d.name for d in feat_root.iterdir() if d.is_dir()} if feat_root.exists() else set()
+todo = [s for s in all_subjs if s not in done]
+print('Total:', len(all_subjs), '| Done:', len(done), '| Todo:', len(todo))
+print('Todo list:', ','.join(todo))
+"
+>> ErrorTerminación(): "Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~."
+**********************
+Inicio de la transcripción de Windows PowerShell
+Hora de inicio: 20261117150025
+Nombre de usuario: COPPEL\angel.roman
+Usuario RunAs: COPPEL\angel.roman
+Nombre de la configuración: 
+Máquina: OBRCLCN232120 (Microsoft Windows NT 10.0.26200.0)
+Aplicación host: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -Command $env:TEMP = $env:_TEMP; $env:TMP = $env:_TMP; $env:LOCALAPPDATA = $env:_LOCALAPPDATA; try { $OutputEncoding = [System.Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
+import json, pathlib
+with open('configs/dataset_manifest.json', 'r', encoding='utf-8') as f:
+    m = json.load(f)
+all_subjs = sorted(m['subjects'].keys())
+feat_root = pathlib.Path('outputs/features/subjects')
+done = {d.name for d in feat_root.iterdir() if d.is_dir()} if feat_root.exists() else set()
+todo = [s for s in all_subjs if s not in done]
+print('Total:', len(all_subjs), '| Done:', len(done), '| Todo:', len(todo))
+print('Todo list:', ','.join(todo))
+"
+Id. de proceso: 327216
+PSVersion: 5.1.26100.9711
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9711
+BuildVersion: 10.0.26100.9711
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+**********************
+Hora de inicio del comando: 20261117150026
+**********************
+PS>CommandInvocation(Out-String): "Out-String"
+>> EnlaceDeParámetros(Out-String): nombre="InputObject"; valor="Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~."
+Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la 
+consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.
+En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ResourceUnavailable: (:) [], ApplicationFailedException
+    + FullyQualifiedErrorId : NativeCommandFailed
+Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la 
+consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.
+En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ResourceUnavailable: (:) [], ApplicationFailedException
+    + FullyQualifiedErrorId : NativeCommandFailed
+Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la
+consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.
+En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ResourceUnavailable: (:) [], ApplicationFailedException
+    + FullyQualifiedErrorId : NativeCommandFailed
+
+**********************
+Hora de inicio del comando: 20261117150026
+**********************
+PS>$global:?
+False
+**********************
+Fin de la transcripción de Windows PowerShell
+Hora de finalización: 20261117150026
+**********************

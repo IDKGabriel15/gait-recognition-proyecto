@@ -35,3 +35,4 @@ git clone --depth 1 https://github.com/ShiqiYu/OpenGait.git third_party/OpenGait
 # Inferencia gráfica en vivo sobre 1 a 3 videos (o webcam frente=0)
 .venv\Scripts\python.exe src\phase4_realtime_sim.py --source frente=ruta_frente.mp4 45_izq=ruta_45izq.mp4 --out-video outputs\visuals\demo.mp4
 ```
+

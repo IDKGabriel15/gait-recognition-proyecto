@@ -30,7 +30,7 @@ GALLERY_DB_PATH = Path(r"c:\Users\angel.roman\Downloads\ProyectoIA\outputs\galle
 
 def classify_with_unknown(
     ranked: list[tuple[str, float]],
-    min_score: float = 0.940,
+    min_score: float = 0.950,
     min_margin: float = 0.015,
 ) -> tuple[str, float, float]:
     """Determina si el Top-1 es válido o debe marcarse como Desconocido."""
@@ -51,7 +51,7 @@ def run_realtime_recognition(
     window_frames: int = 60,
     eval_interval: int = 15,
     alpha_sil: float = 0.85,
-    min_score: float = 0.940,
+    min_score: float = 0.950,
     min_margin: float = 0.015,
 ):
     with open(GALLERY_DB_PATH, "rb") as f:
@@ -271,8 +271,16 @@ def run_realtime_recognition(
     # Conclusión final consolidada al terminar el video
     votes = Counter([v[0] for v in vote_history if v[0] != "Analizando..."])
     if votes:
-        final_identity, top_votes = votes.most_common(1)[0]
         total_votes = sum(votes.values())
+        known_votes = Counter({k: v for k, v in votes.items() if k != "Desconocido"})
+        if known_votes:
+            best_known, best_k_cnt = known_votes.most_common(1)[0]
+            if best_k_cnt / total_votes >= 0.25:
+                final_identity, top_votes = best_known, best_k_cnt
+            else:
+                final_identity, top_votes = "Desconocido", votes.get("Desconocido", 0)
+        else:
+            final_identity, top_votes = "Desconocido", votes.get("Desconocido", 0)
         avg_sc = float(np.mean([v[1] for v in vote_history if v[0] == final_identity]))
         avg_mg = float(np.mean([v[2] for v in vote_history if v[0] == final_identity]))
     else:
@@ -323,7 +331,7 @@ def main():
     )
     parser.add_argument("--out-video", type=str, default=None)
     parser.add_argument("--show", action="store_true")
-    parser.add_argument("--min-score", type=float, default=0.940)
+    parser.add_argument("--min-score", type=float, default=0.950)
     parser.add_argument("--min-margin", type=float, default=0.015)
     args = parser.parse_args()
 

@@ -1,0 +1,147 @@
+﻿**********************
+Inicio de la transcripción de Windows PowerShell
+Hora de inicio: 20261117182407
+Nombre de usuario: COPPEL\angel.roman
+Usuario RunAs: COPPEL\angel.roman
+Nombre de la configuración: 
+Máquina: OBRCLCN232120 (Microsoft Windows NT 10.0.26200.0)
+Aplicación host: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -Command $env:TEMP = $env:_TEMP; $env:TMP = $env:_TMP; $env:LOCALAPPDATA = $env:_LOCALAPPDATA; try { $OutputEncoding = [System.Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
+import json, subprocess, sys
+m = json.load(open('configs/dataset_manifest.json', 'r', encoding='utf-8'))
+targets = []
+for s in ['FernandoRivas', 'NicoleRoman', 'MarcoAntonio']:
+    for t in m['subjects'][s]['probe']:
+        if set(t['angles']) == {'45_der', '45_izq', 'frente'} and all(v.get('frames', 0) > 100 for v in t['videos'].values()):
+            targets.append((s, t['take_name'], t['videos']))
+            break
+for s, tname, vids in targets:
+    out_vp = f'outputs/visuals/full_{s}_{tname}_3cams.mp4'
+    print(f'=== Renderizando {s}/{tname} -> {out_vp} ===', flush=True)
+    subprocess.run([
+        sys.executable, 'src/phase4_realtime_sim.py',
+        '--source',
+        f'frente={vids[\"frente\"][\"video_path\"]}',
+        f'45_izq={vids[\"45_izq\"][\"video_path\"]}',
+        f'45_der={vids[\"45_der\"][\"video_path\"]}',
+        '--out-video', out_vp,
+    ], check=False)
+"
+Id. de proceso: 397032
+PSVersion: 5.1.26100.9711
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9711
+BuildVersion: 10.0.26100.9711
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+**********************
+Hora de inicio del comando: 20261117182407
+**********************
+PS>$env:TEMP = $env:_TEMP; $env:TMP = $env:_TMP; $env:LOCALAPPDATA = $env:_LOCALAPPDATA; try { $OutputEncoding = [System.Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
+import json, subprocess, sys
+m = json.load(open('configs/dataset_manifest.json', 'r', encoding='utf-8'))
+targets = []
+for s in ['FernandoRivas', 'NicoleRoman', 'MarcoAntonio']:
+    for t in m['subjects'][s]['probe']:
+        if set(t['angles']) == {'45_der', '45_izq', 'frente'} and all(v.get('frames', 0) > 100 for v in t['videos'].values()):
+            targets.append((s, t['take_name'], t['videos']))
+            break
+for s, tname, vids in targets:
+    out_vp = f'outputs/visuals/full_{s}_{tname}_3cams.mp4'
+    print(f'=== Renderizando {s}/{tname} -> {out_vp} ===', flush=True)
+    subprocess.run([
+        sys.executable, 'src/phase4_realtime_sim.py',
+        '--source',
+        f'frente={vids[\"frente\"][\"video_path\"]}',
+        f'45_izq={vids[\"45_izq\"][\"video_path\"]}',
+        f'45_der={vids[\"45_der\"][\"video_path\"]}',
+        '--out-video', out_vp,
+    ], check=False)
+"
+>> ErrorTerminación(): "Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~."
+**********************
+Inicio de la transcripción de Windows PowerShell
+Hora de inicio: 20261117182407
+Nombre de usuario: COPPEL\angel.roman
+Usuario RunAs: COPPEL\angel.roman
+Nombre de la configuración: 
+Máquina: OBRCLCN232120 (Microsoft Windows NT 10.0.26200.0)
+Aplicación host: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -Command $env:TEMP = $env:_TEMP; $env:TMP = $env:_TMP; $env:LOCALAPPDATA = $env:_LOCALAPPDATA; try { $OutputEncoding = [System.Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
+import json, subprocess, sys
+m = json.load(open('configs/dataset_manifest.json', 'r', encoding='utf-8'))
+targets = []
+for s in ['FernandoRivas', 'NicoleRoman', 'MarcoAntonio']:
+    for t in m['subjects'][s]['probe']:
+        if set(t['angles']) == {'45_der', '45_izq', 'frente'} and all(v.get('frames', 0) > 100 for v in t['videos'].values()):
+            targets.append((s, t['take_name'], t['videos']))
+            break
+for s, tname, vids in targets:
+    out_vp = f'outputs/visuals/full_{s}_{tname}_3cams.mp4'
+    print(f'=== Renderizando {s}/{tname} -> {out_vp} ===', flush=True)
+    subprocess.run([
+        sys.executable, 'src/phase4_realtime_sim.py',
+        '--source',
+        f'frente={vids[\"frente\"][\"video_path\"]}',
+        f'45_izq={vids[\"45_izq\"][\"video_path\"]}',
+        f'45_der={vids[\"45_der\"][\"video_path\"]}',
+        '--out-video', out_vp,
+    ], check=False)
+"
+Id. de proceso: 397032
+PSVersion: 5.1.26100.9711
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9711
+BuildVersion: 10.0.26100.9711
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+**********************
+Hora de inicio del comando: 20261117182408
+**********************
+PS>CommandInvocation(Out-String): "Out-String"
+>> EnlaceDeParámetros(Out-String): nombre="InputObject"; valor="Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~."
+Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la 
+consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.
+En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ResourceUnavailable: (:) [], ApplicationFailedException
+    + FullyQualifiedErrorId : NativeCommandFailed
+Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la 
+consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.
+En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ResourceUnavailable: (:) [], ApplicationFailedException
+    + FullyQualifiedErrorId : NativeCommandFailed
+Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la
+consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.
+En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ResourceUnavailable: (:) [], ApplicationFailedException
+    + FullyQualifiedErrorId : NativeCommandFailed
+
+**********************
+Hora de inicio del comando: 20261117182408
+**********************
+PS>$global:?
+False
+**********************
+Fin de la transcripción de Windows PowerShell
+Hora de finalización: 20261117182408
+**********************

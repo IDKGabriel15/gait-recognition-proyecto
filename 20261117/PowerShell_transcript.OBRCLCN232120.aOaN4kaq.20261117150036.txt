@@ -1,0 +1,120 @@
+﻿**********************
+Inicio de la transcripción de Windows PowerShell
+Hora de inicio: 20261117150036
+Nombre de usuario: COPPEL\angel.roman
+Usuario RunAs: COPPEL\angel.roman
+Nombre de la configuración: 
+Máquina: OBRCLCN232120 (Microsoft Windows NT 10.0.26200.0)
+Aplicación host: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -Command $env:TEMP = $env:_TEMP; $env:TMP = $env:_TMP; $env:LOCALAPPDATA = $env:_LOCALAPPDATA; try { $OutputEncoding = [System.Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
+import subprocess, sys
+py = sys.executable
+todo = 'AngelVizcaino,DiegoAlonzo,DiegoVelazquez,EdgarAbraham,FernandoLopez,FernandoRivas,FranciscoMeza,GreciaOlivas,IrvingRamirez,JavierCruz,JesusFelix,JeylenGarcia,Jorge_Roberto,JoseGastelum,JoseLuis,JoseOsuna,JuanPablo,LannaMeza,MarcoAntonio,MarcoVinicio,NicoleRoman,PaulinaGonzalez'.split(',')
+for s in todo:
+    print(f'=== Fase 1: {s} ===', flush=True)
+    subprocess.run([py, 'src/phase1_trim.py', '--subject', s], check=False)
+print('=== Fase 2 (22 sujetos, max 2 pasadas/toma) ===', flush=True)
+subprocess.run([py, 'src/phase2_extract_and_visualize.py', '--group', 'subjects', '--subject', ','.join(todo), '--max-passes-per-take', '2'], check=False)
+print('=== Fase 3 (Evaluacion completa 31 sujetos) ===', flush=True)
+subprocess.run([py, 'src/phase3_evaluate.py', '--alpha-sil', '0.85'], check=False)
+"
+Id. de proceso: 315476
+PSVersion: 5.1.26100.9711
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9711
+BuildVersion: 10.0.26100.9711
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+**********************
+Hora de inicio del comando: 20261117150036
+**********************
+PS>$env:TEMP = $env:_TEMP; $env:TMP = $env:_TMP; $env:LOCALAPPDATA = $env:_LOCALAPPDATA; try { $OutputEncoding = [System.Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
+import subprocess, sys
+py = sys.executable
+todo = 'AngelVizcaino,DiegoAlonzo,DiegoVelazquez,EdgarAbraham,FernandoLopez,FernandoRivas,FranciscoMeza,GreciaOlivas,IrvingRamirez,JavierCruz,JesusFelix,JeylenGarcia,Jorge_Roberto,JoseGastelum,JoseLuis,JoseOsuna,JuanPablo,LannaMeza,MarcoAntonio,MarcoVinicio,NicoleRoman,PaulinaGonzalez'.split(',')
+for s in todo:
+    print(f'=== Fase 1: {s} ===', flush=True)
+    subprocess.run([py, 'src/phase1_trim.py', '--subject', s], check=False)
+print('=== Fase 2 (22 sujetos, max 2 pasadas/toma) ===', flush=True)
+subprocess.run([py, 'src/phase2_extract_and_visualize.py', '--group', 'subjects', '--subject', ','.join(todo), '--max-passes-per-take', '2'], check=False)
+print('=== Fase 3 (Evaluacion completa 31 sujetos) ===', flush=True)
+subprocess.run([py, 'src/phase3_evaluate.py', '--alpha-sil', '0.85'], check=False)
+"
+>> ErrorTerminación(): "Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~."
+**********************
+Inicio de la transcripción de Windows PowerShell
+Hora de inicio: 20261117173024
+Nombre de usuario: COPPEL\angel.roman
+Usuario RunAs: COPPEL\angel.roman
+Nombre de la configuración: 
+Máquina: OBRCLCN232120 (Microsoft Windows NT 10.0.26200.0)
+Aplicación host: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -Command $env:TEMP = $env:_TEMP; $env:TMP = $env:_TMP; $env:LOCALAPPDATA = $env:_LOCALAPPDATA; try { $OutputEncoding = [System.Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
+import subprocess, sys
+py = sys.executable
+todo = 'AngelVizcaino,DiegoAlonzo,DiegoVelazquez,EdgarAbraham,FernandoLopez,FernandoRivas,FranciscoMeza,GreciaOlivas,IrvingRamirez,JavierCruz,JesusFelix,JeylenGarcia,Jorge_Roberto,JoseGastelum,JoseLuis,JoseOsuna,JuanPablo,LannaMeza,MarcoAntonio,MarcoVinicio,NicoleRoman,PaulinaGonzalez'.split(',')
+for s in todo:
+    print(f'=== Fase 1: {s} ===', flush=True)
+    subprocess.run([py, 'src/phase1_trim.py', '--subject', s], check=False)
+print('=== Fase 2 (22 sujetos, max 2 pasadas/toma) ===', flush=True)
+subprocess.run([py, 'src/phase2_extract_and_visualize.py', '--group', 'subjects', '--subject', ','.join(todo), '--max-passes-per-take', '2'], check=False)
+print('=== Fase 3 (Evaluacion completa 31 sujetos) ===', flush=True)
+subprocess.run([py, 'src/phase3_evaluate.py', '--alpha-sil', '0.85'], check=False)
+"
+Id. de proceso: 315476
+PSVersion: 5.1.26100.9711
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9711
+BuildVersion: 10.0.26100.9711
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+**********************
+Hora de inicio del comando: 20261117173025
+**********************
+PS>CommandInvocation(Out-String): "Out-String"
+>> EnlaceDeParámetros(Out-String): nombre="InputObject"; valor="Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~."
+Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la 
+consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.
+En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ResourceUnavailable: (:) [], ApplicationFailedException
+    + FullyQualifiedErrorId : NativeCommandFailed
+Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la 
+consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.
+En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ResourceUnavailable: (:) [], ApplicationFailedException
+    + FullyQualifiedErrorId : NativeCommandFailed
+Error al ejecutar el programa 'python.exe': Error interno Win32 "Acceso denegado" 0x5 al leer el búfer de salida de la
+consola. Póngase en contacto con los servicios de soporte al cliente de Microsoft.En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.
+En línea: 1 Carácter: 208
++ ... tEncoding = $OutputEncoding } catch {}; .venv\Scripts\python.exe -c "
++                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ResourceUnavailable: (:) [], ApplicationFailedException
+    + FullyQualifiedErrorId : NativeCommandFailed
+
+**********************
+Hora de inicio del comando: 20261117173025
+**********************
+PS>$global:?
+False
+**********************
+Fin de la transcripción de Windows PowerShell
+Hora de finalización: 20261117173025
+**********************
