@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private var gaitEngine: GaitEngine? = null
 
     private val silBuffer = ArrayDeque<FloatArray>(60)
+    private val motionHistory = ArrayDeque<Pair<Float, Float>>(5)
     private val votes = HashMap<String, Int>()
     private var isAnalyzing = false
     private var frameCounter = 0
@@ -114,7 +115,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun resetSession() {
-        synchronized(silBuffer) { silBuffer.clear() }
+        synchronized(silBuffer) {
+            silBuffer.clear()
+            motionHistory.clear()
+        }
         votes.clear()
         frameCounter = 0
         currentLabel = "Analizando..."
@@ -191,16 +195,27 @@ class MainActivity : AppCompatActivity() {
 
     private fun runFramePipeline(bmp: Bitmap, drawBg: Boolean = false) {
         val res = yolo!!.processFrame(bmp)
-        if (res.alignedSil != null) {
+        var isWalkingNow = false
+        if (res.box != null && res.alignedSil != null) {
+            val cx = (res.box.left + res.box.right) / 2f
+            val bh = res.box.bottom - res.box.top
             synchronized(silBuffer) {
-                if (silBuffer.size >= 45) silBuffer.removeFirst()
-                silBuffer.addLast(res.alignedSil)
+                if (motionHistory.size >= 5) motionHistory.removeFirst()
+                motionHistory.addLast(cx to bh)
+                val first = motionHistory.first()
+                val dcx = abs(cx - first.first)
+                val dbh = abs(bh - first.second)
+                isWalkingNow = (motionHistory.size < 3) || (dcx >= 0.015f) || (dbh >= 0.010f)
+                if (isWalkingNow && bh >= 0.20f) {
+                    if (silBuffer.size >= 45) silBuffer.removeFirst()
+                    silBuffer.addLast(res.alignedSil)
+                }
             }
         }
         frameCounter++
 
         var top3Str = ""
-        if (frameCounter % 6 == 0) {
+        if (isWalkingNow && frameCounter % 6 == 0) {
             val seq = synchronized(silBuffer) { silBuffer.toList() }
             if (seq.size >= 10) {
                 val ranked = gaitEngine!!.identify(seq)

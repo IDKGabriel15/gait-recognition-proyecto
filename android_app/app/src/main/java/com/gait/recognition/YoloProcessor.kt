@@ -114,16 +114,59 @@ class YoloProcessor(context: Context, private val env: OrtEnvironment) {
             (y2 / origH).coerceIn(0f, 1f)
         )
 
-        // Coordenadas en espacio proto (128x128 = 512 / 4)
-        val px1 = (((cx - w / 2f) / 4f).toInt()).coerceIn(0, 127)
-        val py1 = (((cy - h / 2f) / 4f).toInt()).coerceIn(0, 127)
-        val px2 = (((cx + w / 2f) / 4f).toInt()).coerceIn(px1 + 1, 128)
-        val py2 = (((cy + h / 2f) / 4f).toInt()).coerceIn(py1 + 1, 128)
+        // 1. Calcular logits continuos en la grilla 128x128 alrededor de la caja (con margen de 2 px)
+        val px1 = (((cx - w / 2f) / 4f).toInt() - 2).coerceIn(0, 127)
+        val py1 = (((cy - h / 2f) / 4f).toInt() - 2).coerceIn(0, 127)
+        val px2 = (((cx + w / 2f) / 4f).toInt() + 3).coerceIn(px1 + 1, 128)
+        val py2 = (((cy + h / 2f) / 4f).toInt() + 3).coerceIn(py1 + 1, 128)
 
         val coeffs = FloatArray(32) { k -> dets[84 + k][bestIdx] }
-        val cropW = px2 - px1
-        val cropH = py2 - py1
-        val mask = BooleanArray(cropW * cropH)
+        val protoW = px2 - px1
+        val protoH = py2 - py1
+        val logits128 = FloatArray(protoH * protoW)
+
+        for (my in 0 until protoH) {
+            val py = py1 + my
+            for (mx in 0 until protoW) {
+                val px = px1 + mx
+                var sum = 0f
+                for (k in 0 until 32) {
+                    sum += coeffs[k] * protos[k][py][px]
+                }
+                logits128[my * protoW + mx] = sum
+            }
+        }
+
+        // Función auxiliar: interpolación bilineal sobre logits128 en coordenadas de 512x512
+        fun sampleLogit512(x512: Float, y512: Float): Float {
+            // Mapear de 512x512 a 128x128 (align_corners=False estilo PyTorch/OpenCV)
+            val gx = ((x512 + 0.5f) / 4f - 0.5f) - px1
+            val gy = ((y512 + 0.5f) / 4f - 0.5f) - py1
+            val x0 = gx.toInt().coerceIn(0, protoW - 1)
+            val y0 = gy.toInt().coerceIn(0, protoH - 1)
+            val x1p = (x0 + 1).coerceIn(0, protoW - 1)
+            val y1p = (y0 + 1).coerceIn(0, protoH - 1)
+            val wx = (gx - x0).coerceIn(0f, 1f)
+            val wy = (gy - y0).coerceIn(0f, 1f)
+
+            val v00 = logits128[y0 * protoW + x0]
+            val v01 = logits128[y0 * protoW + x1p]
+            val v10 = logits128[y1p * protoW + x0]
+            val v11 = logits128[y1p * protoW + x1p]
+            val top = v00 * (1f - wx) + v01 * wx
+            val bot = v10 * (1f - wx) + v11 * wx
+            return top * (1f - wy) + bot * wy
+        }
+
+        // 2. Evaluar máscara suavizada en espacio 512x512 dentro de la caja detectada
+        val bx1 = (cx - w / 2f).roundToInt().coerceIn(0, inputSize - 1)
+        val by1 = (cy - h / 2f).roundToInt().coerceIn(0, inputSize - 1)
+        val bx2 = (cx + w / 2f).roundToInt().coerceIn(bx1 + 1, inputSize)
+        val by2 = (cy + h / 2f).roundToInt().coerceIn(by1 + 1, inputSize)
+
+        val cropW = bx2 - bx1
+        val cropH = by2 - by1
+        val mask512 = BooleanArray(cropH * cropW)
         var fgCount = 0
         var minMy = cropH
         var maxMy = -1
@@ -131,16 +174,12 @@ class YoloProcessor(context: Context, private val env: OrtEnvironment) {
         var maxMx = -1
 
         for (my in 0 until cropH) {
-            val py = py1 + my
+            val y512 = (by1 + my).toFloat()
             for (mx in 0 until cropW) {
-                val px = px1 + mx
-                var sum = 0f
-                for (k in 0 until 32) {
-                    sum += coeffs[k] * protos[k][py][px]
-                }
-                val prob = 1f / (1f + exp(-sum))
-                if (prob > 0.5f) {
-                    mask[my * cropW + mx] = true
+                val x512 = (bx1 + mx).toFloat()
+                // logit > 0f equivale exactamente a sigmoid(logit) > 0.5f
+                if (sampleLogit512(x512, y512) > 0f) {
+                    mask512[my * cropW + mx] = true
                     fgCount++
                     if (my < minMy) minMy = my
                     if (my > maxMy) maxMy = my
@@ -149,9 +188,9 @@ class YoloProcessor(context: Context, private val env: OrtEnvironment) {
                 }
             }
         }
-        if (fgCount < 20 || maxMy <= minMy || maxMx <= minMx) return null
+        if (fgCount < 80 || maxMy <= minMy || maxMx <= minMx) return null
 
-        // Alinear a 64x44 estilo OpenGait
+        // 3. Alinear a 64x44 estilo OpenGait (para GaitBase)
         val outH = 64
         val outW = 44
         val tightH = maxMy - minMy + 1
@@ -166,7 +205,7 @@ class YoloProcessor(context: Context, private val env: OrtEnvironment) {
             val sy = minMy + min(tightH - 1, (oy / silScale).toInt())
             for (ox in 0 until newW) {
                 val sx = minMx + min(tightW - 1, (ox / silScale).toInt())
-                if (mask[sy * cropW + sx]) {
+                if (mask512[sy * cropW + sx]) {
                     resized[oy * newW + ox] = true
                     sumFgX += ox
                     sumFgN++
@@ -177,15 +216,36 @@ class YoloProcessor(context: Context, private val env: OrtEnvironment) {
         val xOffset = (outW / 2) - centerX
 
         val canvas = FloatArray(outH * outW)
-        val preview = Bitmap.createBitmap(outW, outH, Bitmap.Config.ARGB_8888)
         for (oy in 0 until outH) {
             for (ox in 0 until outW) {
                 val sx = ox - xOffset
                 val fg = sx in 0 until newW && resized[oy * newW + sx]
                 canvas[oy * outW + ox] = if (fg) 1f else 0f
-                preview.setPixel(ox, oy, if (fg) Color.WHITE else Color.BLACK)
             }
         }
+
+        // 4. Generar silPreview en alta resolución (176x256, 4x) con bordes suaves para la UI
+        val prevH = 256
+        val prevW = 176
+        val prevScale = prevH.toFloat() / tightH.toFloat()
+        val prevNewW = max(1, (tightW * prevScale).roundToInt())
+        val prevXOffset = (prevW / 2) - (centerX * 4)
+        val preview = Bitmap.createBitmap(prevW, prevH, Bitmap.Config.ARGB_8888)
+        val prevPixels = IntArray(prevW * prevH)
+        for (oy in 0 until prevH) {
+            val y512 = by1 + minMy + (oy / prevScale)
+            for (ox in 0 until prevW) {
+                val sx = ox - prevXOffset
+                val fg = if (sx in 0 until prevNewW) {
+                    val x512 = bx1 + minMx + (sx / prevScale)
+                    sampleLogit512(x512, y512) > 0f
+                } else {
+                    false
+                }
+                prevPixels[oy * prevW + ox] = if (fg) Color.WHITE else Color.BLACK
+            }
+        }
+        preview.setPixels(prevPixels, 0, prevW, 0, 0, prevW, prevH)
 
         return Triple(box, canvas, preview)
     }
