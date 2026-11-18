@@ -65,7 +65,7 @@ class GaitEngine(context: Context, private val env: OrtEnvironment) {
                     }
                 }
             }
-            for (i in silMean.indices) silMean[i] /= entries.size
+            for (i in silMean.indices) silMean[i] = silMean[i] / entries.size.toFloat()
 
             silMat = FloatArray(rawSilMat.size)
             for (entry in entries.indices) {
