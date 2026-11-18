@@ -15,6 +15,7 @@ weights/
 third_party/
 *.pt
 *.onnx
+!android_app/app/src/main/assets/*.onnx
 
 # Salidas pesadas regenerables
 outputs/features/
