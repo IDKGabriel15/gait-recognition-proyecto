@@ -208,7 +208,7 @@ class MainActivity : AppCompatActivity() {
                     val t1 = ranked[0]
                     val t2Score = if (ranked.size > 1) ranked[1].score else 0f
                     val margin = t1.score - t2Score
-                    if (t1.score >= 0.945f && margin >= 0.010f) {
+                    if (t1.score >= 0.600f && margin >= 0.050f) {
                         currentLabel = "${t1.subject} (${"%.2f".format(t1.score)})"
                         currentColor = Color.rgb(0, 230, 140)
                         votes[t1.subject] = (votes[t1.subject] ?: 0) + 1

@@ -30,8 +30,8 @@ GALLERY_DB_PATH = Path(r"c:\Users\angel.roman\Downloads\ProyectoIA\outputs\galle
 
 def classify_with_unknown(
     ranked: list[tuple[str, float]],
-    min_score: float = 0.950,
-    min_margin: float = 0.015,
+    min_score: float = 0.600,
+    min_margin: float = 0.050,
 ) -> tuple[str, float, float]:
     """Determina si el Top-1 es válido o debe marcarse como Desconocido."""
     if not ranked:
@@ -51,8 +51,8 @@ def run_realtime_recognition(
     window_frames: int = 60,
     eval_interval: int = 15,
     alpha_sil: float = 0.85,
-    min_score: float = 0.950,
-    min_margin: float = 0.015,
+    min_score: float = 0.600,
+    min_margin: float = 0.050,
 ):
     with open(GALLERY_DB_PATH, "rb") as f:
         gallery_db = pickle.load(f)
@@ -342,8 +342,8 @@ def main():
     )
     parser.add_argument("--out-video", type=str, default=None)
     parser.add_argument("--show", action="store_true")
-    parser.add_argument("--min-score", type=float, default=0.950)
-    parser.add_argument("--min-margin", type=float, default=0.015)
+    parser.add_argument("--min-score", type=float, default=0.600)
+    parser.add_argument("--min-margin", type=float, default=0.050)
     args = parser.parse_args()
 
     sources = []

@@ -42,8 +42,8 @@ class GaitAppGUI:
         self.worker_thread: threading.Thread | None = None
         self.video_sources: list[tuple[str, str]] = [("frente", "0")]
 
-        self.min_score_var = tk.DoubleVar(value=0.950)
-        self.min_margin_var = tk.DoubleVar(value=0.015)
+        self.min_score_var = tk.DoubleVar(value=0.600)
+        self.min_margin_var = tk.DoubleVar(value=0.050)
         self.save_video_var = tk.BooleanVar(value=False)
         self.status_var = tk.StringVar(value="Cargando modelos (GaitBase + YOLOv8 seg/pose)...")
 
@@ -91,13 +91,13 @@ class GaitAppGUI:
 
         tk.Label(sliders, text="Umbral Score:", bg="#16191d", fg="#c9d1d9", font=("Segoe UI", 9)).pack(side=tk.LEFT)
         tk.Scale(
-            sliders, from_=0.85, to=0.98, resolution=0.005, orient=tk.HORIZONTAL,
+            sliders, from_=0.30, to=0.95, resolution=0.01, orient=tk.HORIZONTAL,
             variable=self.min_score_var, bg="#16191d", fg="#58a6ff", highlightthickness=0, length=180
         ).pack(side=tk.LEFT, padx=(4, 16))
 
         tk.Label(sliders, text="Umbral Margen:", bg="#16191d", fg="#c9d1d9", font=("Segoe UI", 9)).pack(side=tk.LEFT)
         tk.Scale(
-            sliders, from_=0.00, to=0.05, resolution=0.005, orient=tk.HORIZONTAL,
+            sliders, from_=0.00, to=0.20, resolution=0.005, orient=tk.HORIZONTAL,
             variable=self.min_margin_var, bg="#16191d", fg="#58a6ff", highlightthickness=0, length=180
         ).pack(side=tk.LEFT, padx=(4, 16))
 

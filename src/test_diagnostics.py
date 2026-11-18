@@ -82,8 +82,8 @@ def main():
 
     # Probar rejilla de umbrales
     print("\n  Rejilla de umbrales (TAR = Conocidos aceptados, TRR = Desconocidos rechazados):")
-    for sc_th in (0.940, 0.950, 0.955, 0.960, 0.965):
-        for mg_th in (0.005, 0.010, 0.015):
+    for sc_th in (0.45, 0.50, 0.55, 0.60, 0.65, 0.70):
+        for mg_th in (0.03, 0.05, 0.08, 0.10):
             tar = float(np.mean((ks >= sc_th) & (km >= mg_th))) * 100
             trr = float(np.mean((us < sc_th) | (um < mg_th))) * 100
             print(f"    min_score={sc_th:.3f}, min_margin={mg_th:.3f} -> TAR={tar:5.1f}% | TRR={trr:5.1f}%")
