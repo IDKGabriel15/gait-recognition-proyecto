@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val videoPicker = registerForActivityResult(
-        ActivityResultContracts.GetContent()
+        ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         if (uri != null) analyzeVideoUri(uri)
     }
@@ -85,7 +85,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnReset.setOnClickListener { resetSession() }
-        btnVideo.setOnClickListener { videoPicker.launch("video/*") }
+        btnVideo.setOnClickListener {
+            if (yolo == null || gaitEngine == null) {
+                statusText.text = "Espera a que terminen de cargar los modelos..."
+            } else {
+                videoPicker.launch(arrayOf("video/*"))
+            }
+        }
 
         thread {
             try {
@@ -113,6 +119,8 @@ class MainActivity : AppCompatActivity() {
         frameCounter = 0
         currentLabel = "Analizando..."
         currentColor = Color.YELLOW
+        overlayView.setImageDrawable(null)
+        silhouettePreview.setImageDrawable(null)
         statusText.text = "Caminata reiniciada"
         top3Text.text = "Top-3: --"
     }
@@ -151,24 +159,37 @@ class MainActivity : AppCompatActivity() {
         resetSession()
         isAnalyzing = false
         btnToggle.text = "Iniciar"
-        statusText.text = "Procesando video seleccionado..."
+        statusText.text = "Copiando y analizando video..."
         thread {
             val retriever = MediaMetadataRetriever()
-            retriever.setDataSource(this, uri)
-            val durMs = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
-            val stepMs = 66L // ~15 fps de muestreo
-            var t = 0L
-            while (t < durMs) {
-                val bmp = retriever.getFrameAtTime(t * 1000L, MediaMetadataRetriever.OPTION_CLOSEST)
-                if (bmp != null) runFramePipeline(bmp)
-                t += stepMs
+            try {
+                val tempFile = java.io.File(cacheDir, "picked_video.mp4")
+                contentResolver.openInputStream(uri)?.use { input ->
+                    tempFile.outputStream().use { output -> input.copyTo(output) }
+                } ?: throw IllegalStateException("No se pudo leer el archivo seleccionado")
+
+                retriever.setDataSource(tempFile.absolutePath)
+                val durMs = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
+                val stepMs = 80L // ~12.5 fps de muestreo
+                var t = 0L
+                while (t < durMs) {
+                    val bmp = retriever.getFrameAtTime(t * 1000L, MediaMetadataRetriever.OPTION_CLOSEST)
+                    if (bmp != null) runFramePipeline(bmp, drawBg = true)
+                    t += stepMs
+                }
+                runOnUiThread {
+                    overlayView.setImageDrawable(null)
+                    showFinalConclusion()
+                }
+            } catch (e: Exception) {
+                runOnUiThread { statusText.text = "Error abriendo video: ${e.message}" }
+            } finally {
+                try { retriever.release() } catch (_: Exception) {}
             }
-            retriever.release()
-            runOnUiThread { showFinalConclusion() }
         }
     }
 
-    private fun runFramePipeline(bmp: Bitmap) {
+    private fun runFramePipeline(bmp: Bitmap, drawBg: Boolean = false) {
         val res = yolo!!.processFrame(bmp)
         if (res.alignedSil != null) {
             synchronized(silBuffer) {
@@ -201,7 +222,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val overlay = YoloProcessor.drawOverlay(bmp.width, bmp.height, res.box, res.keypoints, currentLabel, currentColor)
+        val overlay = YoloProcessor.drawOverlay(
+            bmp.width, bmp.height, res.box, res.keypoints, currentLabel, currentColor,
+            bgBitmap = if (drawBg) bmp else null
+        )
         runOnUiThread {
             overlayView.setImageBitmap(overlay)
             if (res.silPreview != null) silhouettePreview.setImageBitmap(res.silPreview)

@@ -83,14 +83,15 @@ class YoloProcessor(context: Context, private val env: OrtEnvironment) {
     ): Triple<RectF, FloatArray, Bitmap>? {
         val numAnchors = dets[0].size
         var bestIdx = -1
-        var bestHeight = 0f
+        var bestScore = 0f
 
         for (i in 0 until numAnchors) {
             val conf = dets[4][i] // clase 0 = person
-            if (conf < 0.45f) continue
             val h = dets[3][i]
-            if (h > bestHeight) {
-                bestHeight = h
+            if (conf < 0.55f || h < 40f) continue
+            val sc = conf * min(h, 400f)
+            if (sc > bestScore) {
+                bestScore = sc
                 bestIdx = i
             }
         }
@@ -199,11 +200,14 @@ class YoloProcessor(context: Context, private val env: OrtEnvironment) {
     ): Array<FloatArray>? {
         val numAnchors = dets[0].size
         var bestIdx = -1
-        var bestHeight = 0f
+        var bestScore = 0f
         for (i in 0 until numAnchors) {
-            if (dets[4][i] < 0.45f) continue
-            if (dets[3][i] > bestHeight) {
-                bestHeight = dets[3][i]
+            val conf = dets[4][i]
+            val h = dets[3][i]
+            if (conf < 0.55f || h < 40f) continue
+            val sc = conf * min(h, 400f)
+            if (sc > bestScore) {
+                bestScore = sc
                 bestIdx = i
             }
         }
@@ -259,8 +263,20 @@ class YoloProcessor(context: Context, private val env: OrtEnvironment) {
             11 to 13, 13 to 15, 12 to 14, 14 to 16
         )
 
-        fun drawOverlay(width: Int, height: Int, box: RectF?, kpts: Array<FloatArray>?, label: String, color: Int): Bitmap {
-            val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        fun drawOverlay(
+            width: Int,
+            height: Int,
+            box: RectF?,
+            kpts: Array<FloatArray>?,
+            label: String,
+            color: Int,
+            bgBitmap: Bitmap? = null
+        ): Bitmap {
+            val bmp = if (bgBitmap != null) {
+                bgBitmap.copy(Bitmap.Config.ARGB_8888, true)
+            } else {
+                Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            }
             val canvas = Canvas(bmp)
             val boxPaint = Paint().apply {
                 this.color = color
@@ -281,7 +297,7 @@ class YoloProcessor(context: Context, private val env: OrtEnvironment) {
                 val linePaint = Paint().apply { strokeWidth = 6f; isAntiAlias = true }
                 val ptPaint = Paint().apply { style = Paint.Style.FILL; isAntiAlias = true }
                 for ((i, j) in COCO_SKELETON) {
-                    if (kpts[i][2] >= 0.3f && kpts[j][2] >= 0.3f) {
+                    if (kpts[i][2] >= 0.45f && kpts[j][2] >= 0.45f) {
                         linePaint.color = if (i % 2 == 1 && j % 2 == 1) Color.rgb(80, 230, 120) else Color.rgb(40, 165, 255)
                         canvas.drawLine(
                             kpts[i][0] * width, kpts[i][1] * height,
@@ -290,7 +306,7 @@ class YoloProcessor(context: Context, private val env: OrtEnvironment) {
                     }
                 }
                 for (k in 0 until 17) {
-                    if (kpts[k][2] >= 0.3f) {
+                    if (kpts[k][2] >= 0.45f) {
                         ptPaint.color = if (k % 2 == 1) Color.GREEN else Color.YELLOW
                         canvas.drawCircle(kpts[k][0] * width, kpts[k][1] * height, 8f, ptPaint)
                     }
