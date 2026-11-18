@@ -63,7 +63,7 @@ def run_realtime_recognition(
 
     caps = []
     for angle, src in sources:
-        cap = cv2.VideoCapture(int(src) if src.isdigit() else src)
+        cap = cv2.VideoCapture(int(src), cv2.CAP_DSHOW) if src.isdigit() else cv2.VideoCapture(src)
         if not cap.isOpened():
             raise RuntimeError(f"No se pudo abrir fuente {angle}: {src}")
         caps.append((angle, cap))
@@ -263,8 +263,19 @@ def run_realtime_recognition(
             writer.write(canvas)
         if show:
             cv2.imshow("Gait Recognition - Live", canvas)
-            if cv2.waitKey(1) & 0xFF == 27:
+            key = cv2.waitKey(1) & 0xFF
+            if key in (27, ord("q"), ord("Q")):
                 break
+            if key in (ord("r"), ord("R")):
+                for buf in sil_buffers.values():
+                    buf.clear()
+                for buf in kpt_buffers.values():
+                    buf.clear()
+                l_trail.clear()
+                r_trail.clear()
+                vote_history.clear()
+                current_top3 = []
+                current_decision = ("Analizando...", 0.0, 0.0)
 
         frame_idx += 1
 
