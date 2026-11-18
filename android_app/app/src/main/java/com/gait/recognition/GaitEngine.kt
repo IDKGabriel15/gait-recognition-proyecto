@@ -17,7 +17,11 @@ class GaitEngine(context: Context, private val env: OrtEnvironment) {
     private val gaitSession: OrtSession
     private val entries = mutableListOf<GalleryEntry>()
     private val silMat: FloatArray
+    private val partMajorFeatures: Boolean
     private val silDim = 4096
+    private val parts = 16
+    private val channelsPerPart = silDim / parts
+    private val silMean: FloatArray
 
     init {
         val modelBytes = context.assets.open("gaitbase_mobile.onnx").readBytes()
@@ -25,16 +29,64 @@ class GaitEngine(context: Context, private val env: OrtEnvironment) {
 
         val idxJson = context.assets.open("gallery_index.json").bufferedReader().use { it.readText() }
         val root = JSONObject(idxJson)
+        partMajorFeatures = root.optString("sil_layout") == "part-major-v1"
         val arr = root.getJSONArray("entries")
         for (i in 0 until arr.length()) {
             val o = arr.getJSONObject(i)
             entries.add(GalleryEntry(o.getString("s"), o.getString("a"), o.getInt("si"), o.getInt("ki")))
         }
+        require(entries.isNotEmpty()) { "gallery_index.json contains no entries" }
 
         val silBytes = context.assets.open("gallery_sil.bin").readBytes()
         val fb = ByteBuffer.wrap(silBytes).order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer()
-        silMat = FloatArray(fb.remaining())
-        fb.get(silMat)
+        val rawSilMat = FloatArray(fb.remaining())
+        fb.get(rawSilMat)
+        require(rawSilMat.size == entries.size * silDim) {
+            "gallery_sil.bin size does not match gallery_index.json"
+        }
+
+        if (partMajorFeatures) {
+            val meanBytes = context.assets.open("gallery_sil_mean.bin").readBytes()
+            val meanBuffer = ByteBuffer.wrap(meanBytes).order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer()
+            silMean = FloatArray(meanBuffer.remaining())
+            meanBuffer.get(silMean)
+            require(silMean.size == silDim) {
+                "gallery_sil_mean.bin must contain $silDim float values"
+            }
+            silMat = rawSilMat
+        } else {
+            silMean = FloatArray(silDim)
+            for (entry in entries.indices) {
+                val offset = entry * silDim
+                for (part in 0 until parts) {
+                    for (channel in 0 until channelsPerPart) {
+                        silMean[part * channelsPerPart + channel] +=
+                            rawSilMat[offset + channel * parts + part]
+                    }
+                }
+            }
+            for (i in silMean.indices) silMean[i] /= entries.size
+
+            silMat = FloatArray(rawSilMat.size)
+            for (entry in entries.indices) {
+                val offset = entry * silDim
+                for (part in 0 until parts) {
+                    val partOffset = offset + part * channelsPerPart
+                    var normSquared = 0f
+                    for (channel in 0 until channelsPerPart) {
+                        val index = part * channelsPerPart + channel
+                        val value = rawSilMat[offset + channel * parts + part] - silMean[index]
+                        silMat[partOffset + channel] = value
+                        normSquared += value * value
+                    }
+                    val norm = sqrt(normSquared)
+                    for (channel in 0 until channelsPerPart) {
+                        val index = partOffset + channel
+                        silMat[index] = if (norm > 1e-8f) silMat[index] / norm else 0f
+                    }
+                }
+            }
+        }
     }
 
     fun identify(silBuffer: List<FloatArray>): List<MatchScore> {
@@ -62,21 +114,47 @@ class GaitEngine(context: Context, private val env: OrtEnvironment) {
             }
         }
 
-        // L2-normalizar por seguridad
-        var norm = 0f
-        for (v in emb) norm += v * v
-        norm = sqrt(norm).coerceAtLeast(1e-8f)
-        for (i in emb.indices) emb[i] /= norm
+        require(emb.size == silDim) { "GaitBase ONNX output must contain $silDim values" }
+        val normalized = FloatArray(silDim)
+        for (part in 0 until parts) {
+            val start = part * channelsPerPart
+            var normSquared = 0f
+            for (channel in 0 until channelsPerPart) {
+                val index = start + channel
+                val outputIndex = if (partMajorFeatures) index else channel * parts + part
+                val value = emb[outputIndex] - silMean[index]
+                normalized[index] = value
+                normSquared += value * value
+            }
+            val norm = sqrt(normSquared)
+            if (norm > 1e-8f) {
+                for (channel in 0 until channelsPerPart) {
+                    val index = start + channel
+                    normalized[index] /= norm
+                }
+            } else {
+                for (channel in 0 until channelsPerPart) {
+                    normalized[start + channel] = 0f
+                }
+            }
+        }
 
         val bestPerSubject = HashMap<String, Float>()
         for (e in entries) {
             val offset = e.silIdx * silDim
-            var dot = 0f
-            for (d in 0 until silDim) {
-                dot += silMat[offset + d] * emb[d]
+            var score = 0f
+            for (part in 0 until parts) {
+                val start = part * channelsPerPart
+                var partDot = 0f
+                for (channel in 0 until channelsPerPart) {
+                    val index = start + channel
+                    partDot += silMat[offset + index] * normalized[index]
+                }
+                score += partDot
             }
+            score /= parts
             val prev = bestPerSubject[e.subject] ?: -1f
-            if (dot > prev) bestPerSubject[e.subject] = dot
+            if (score > prev) bestPerSubject[e.subject] = score
         }
 
         return bestPerSubject.entries

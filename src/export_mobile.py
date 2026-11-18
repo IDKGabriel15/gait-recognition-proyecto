@@ -18,10 +18,14 @@ import torch.nn as nn
 from ultralytics import YOLO
 
 from phase3_gait_engine import GaitBaseInference
+from silhouette_embedding import center_and_normalize_gallery
 
 CKPT_PATH = Path(r"c:\Users\angel.roman\Downloads\ProyectoIA\weights\GaitBase_DA-180000.pt")
 GALLERY_PKL = Path(r"c:\Users\angel.roman\Downloads\ProyectoIA\outputs\gallery_db.pkl")
 OUT_DIR = Path(r"c:\Users\angel.roman\Downloads\ProyectoIA\mobile_assets")
+SAMPLE_SIL_PATH = Path(
+    r"outputs\features\subjects\Alejandro\toma_08\pass_01\frente\silhouettes.npy"
+)
 
 
 class GaitBaseMobileWrapper(nn.Module):
@@ -39,8 +43,7 @@ class GaitBaseMobileWrapper(nn.Module):
         outs = torch.max(outs, dim=2)[0]  # Temporal Max Pooling -> [1, 512, H', W']
         feat = self.HPP(outs)  # [1, 512, 16]
         embed = self.FCs(feat)  # [1, 256, 16]
-        vec = embed.reshape(1, -1)  # [1, 4096]
-        return torch.nn.functional.normalize(vec, p=2, dim=1)
+        return embed.transpose(1, 2).contiguous().reshape(1, -1)  # [1, 4096], (P, C)
 
 
 def export_gaitbase_onnx(out_path: Path):
@@ -60,16 +63,14 @@ def export_gaitbase_onnx(out_path: Path):
     )
 
     # Verificar equivalencia numérica con PyTorch usando una secuencia real
-    sample_sil = np.load(
-        r"outputs\features\subjects\Alejandro\toma_08\pass_01\frente\silhouettes.npy"
-    )
+    sample_sil = np.load(SAMPLE_SIL_PATH)
     pt_emb = base.extract_embedding(sample_sil)
 
     valid = sample_sil.sum(axis=(1, 2)) > 0
     x_np = (sample_sil[valid].astype(np.float32) / 255.0)[None, None, :, :, :]
     sess = ort.InferenceSession(str(out_path), providers=["CPUExecutionProvider"])
     onnx_emb = sess.run(None, {"sil_seq": x_np})[0][0]
-    cos_sim = float(np.dot(pt_emb, onnx_emb))
+    cos_sim = float(np.dot(pt_emb, onnx_emb) / (np.linalg.norm(pt_emb) * np.linalg.norm(onnx_emb)))
     size_mb = out_path.stat().st_size / (1024 * 1024)
     print(f"[OK] {out_path.name}: {size_mb:.2f} MB | cos_sim(PyTorch vs ONNX) = {cos_sim:.6f}")
 
@@ -98,6 +99,15 @@ def export_gallery_binary():
     sil_vecs = []
     skel_vecs = []
 
+    gallery_entries = [g for entries in db.values() for g in entries if g.get("sil") is not None]
+    if not gallery_entries:
+        raise RuntimeError("La galería no contiene embeddings de silueta.")
+    if any(g.get("sil_format") != "part-major-raw-v1" for g in gallery_entries):
+        raise RuntimeError(
+            "La galería está desactualizada; vuelve a ejecutar phase3_evaluate.py "
+            "para regenerar embeddings por franja."
+        )
+
     all_skel = [g["skel"] for entries in db.values() for g in entries if g.get("skel") is not None]
     skel_mean = np.mean(all_skel, axis=0).astype(np.float32)
 
@@ -119,10 +129,13 @@ def export_gallery_binary():
                 {"s": subj, "a": g["angle"], "si": sil_idx, "ki": skel_idx}
             )
 
-    sil_mat = np.stack(sil_vecs, axis=0).astype(np.float32)  # (N, 4096)
+    sil_mat, sil_mean = center_and_normalize_gallery(
+        np.stack(sil_vecs, axis=0).astype(np.float32)
+    )
     skel_mat = np.stack(skel_vecs, axis=0).astype(np.float32)  # (M, 99)
 
     (OUT_DIR / "gallery_sil.bin").write_bytes(sil_mat.tobytes())
+    (OUT_DIR / "gallery_sil_mean.bin").write_bytes(sil_mean.tobytes())
     (OUT_DIR / "gallery_skel.bin").write_bytes(skel_mat.tobytes())
     (OUT_DIR / "gallery_skel_mean.bin").write_bytes(skel_mean.tobytes())
     (OUT_DIR / "gallery_index.json").write_text(
@@ -131,6 +144,9 @@ def export_gallery_binary():
                 "num_subjects": len(db),
                 "num_entries": len(entries_meta),
                 "sil_dim": 4096,
+                "sil_parts": 16,
+                "sil_channels": 256,
+                "sil_layout": "part-major-v1",
                 "skel_dim": 99,
                 "entries": entries_meta,
             },
@@ -140,7 +156,13 @@ def export_gallery_binary():
     )
     total_mb = sum(
         (OUT_DIR / fn).stat().st_size
-        for fn in ("gallery_sil.bin", "gallery_skel.bin", "gallery_skel_mean.bin", "gallery_index.json")
+        for fn in (
+            "gallery_sil.bin",
+            "gallery_sil_mean.bin",
+            "gallery_skel.bin",
+            "gallery_skel_mean.bin",
+            "gallery_index.json",
+        )
     ) / (1024 * 1024)
     print(f"[OK] Galería móvil exportada: {len(entries_meta)} entradas, {total_mb:.2f} MB")
 

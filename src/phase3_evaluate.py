@@ -66,6 +66,7 @@ def build_gallery(manifest: dict, model: GaitBaseInference) -> dict[str, list[di
                             "pass": p["pass_name"],
                             "angle": angle,
                             "sil": sil_emb,
+                            "sil_format": "part-major-raw-v1",
                             "skel": skel_emb,
                         }
                     )

@@ -36,3 +36,9 @@ git clone --depth 1 https://github.com/ShiqiYu/OpenGait.git third_party/OpenGait
 .venv\Scripts\python.exe src\phase4_realtime_sim.py --source frente=ruta_frente.mp4 45_izq=ruta_45izq.mp4 --out-video outputs\visuals\demo.mp4
 ```
 
+## Exportación móvil
+
+Después de cambiar el modelo o la galería, vuelve a generar los assets de Android. Primero regenera `outputs/gallery_db.pkl` con `src/phase3_evaluate.py`; después ejecuta `src/export_mobile.py` (o `src/build_onnx_mobile_gallery.py`). La exportación produce embeddings centrados y normalizados por cada una de las 16 franjas, junto con `gallery_sil_mean.bin`; ese archivo debe distribuirse con `gallery_sil.bin`, `gallery_index.json` y `gaitbase_mobile.onnx`. El exportador rechaza galerías pickle antiguas para evitar mezclar órdenes de características.
+
+Para ejecutar el procesamiento en la nube, abre el [notebook de Google Colab](./notebooks/gait_pipeline_colab.ipynb). Usa los pesos preentrenados de GaitBase; no realiza fine-tuning.
+

@@ -28,6 +28,10 @@ from opengait.modeling.modules import (
     SeparateFCs,
     SetBlockWrapper,
 )
+from silhouette_embedding import (
+    center_and_normalize_embedding,
+    center_and_normalize_gallery,
+)
 
 
 class GaitBaseInference(nn.Module):
@@ -64,7 +68,7 @@ class GaitBaseInference(nn.Module):
 
     @torch.no_grad()
     def extract_embedding(self, sil_seq: np.ndarray) -> np.ndarray | None:
-        """Extrae embedding L2-normalizado (4096-D) desde siluetas (T, 64, 44)."""
+        """Extrae features crudas (4096-D, ordenadas por franja) de siluetas."""
         # Filtrar frames vacíos
         valid_mask = sil_seq.sum(axis=(1, 2)) > 0
         sil_valid = sil_seq[valid_mask]
@@ -72,16 +76,23 @@ class GaitBaseInference(nn.Module):
             return None
 
         # [1, 1, S, 64, 44] normalizado a [0, 1]
-        x = torch.from_numpy(sil_valid).float().unsqueeze(0).unsqueeze(0) / 255.0
+        device = next(self.parameters()).device
+        x = (
+            torch.from_numpy(sil_valid)
+            .to(device=device, dtype=torch.float32)
+            .unsqueeze(0)
+            .unsqueeze(0)
+            / 255.0
+        )
         outs = self.Backbone(x)  # [1, 512, S, H', W']
         outs = self.TP(outs, seqL=None, options={"dim": 2})[0]  # [1, 512, H', W']
         feat = self.HPP(outs)  # [1, 512, 16]
         embed_1 = self.FCs(feat)  # [1, 256, 16]
-        vec = embed_1.reshape(-1).cpu().numpy().astype(np.float32)
-        norm = np.linalg.norm(vec)
-        if norm < 1e-8:
+        parts = embed_1.squeeze(0).transpose(0, 1).contiguous()  # [16, 256]
+        vec = parts.reshape(-1).cpu().numpy().astype(np.float32)
+        if np.linalg.norm(vec) < 1e-8:
             return None
-        return vec / norm
+        return vec
 
 
 def _angle_series(a: np.ndarray, b: np.ndarray, c: np.ndarray) -> np.ndarray:
@@ -182,9 +193,29 @@ def match_probe_against_gallery(
     `gallery_db`: {subject_name: [{"angle": str, "sil": np.ndarray, "skel": np.ndarray}, ...]}
     Retorna lista ordenada [(subject, score), ...] de mayor a menor similitud.
     """
-    # Calcular media global de skel_emb en la galería para centrar (evitar similitud 0.999)
+    if any(
+        g.get("sil") is not None and g.get("sil_format") != "part-major-raw-v1"
+        for entries in gallery_db.values()
+        for g in entries
+    ):
+        raise ValueError(
+            "La galería usa embeddings antiguos; vuelve a generarla con phase3_evaluate.py."
+        )
+
+    # Calcular medias de galería para centrar los descriptores.
     all_skel = [g["skel"] for entries in gallery_db.values() for g in entries if g.get("skel") is not None]
     skel_mean = np.mean(all_skel, axis=0) if all_skel else None
+    sil_entries = [
+        g for entries in gallery_db.values() for g in entries if g.get("sil") is not None
+    ]
+
+    sil_gallery = {}
+    sil_mean = None
+    if sil_entries:
+        normalized, sil_mean = center_and_normalize_gallery(
+            np.stack([g["sil"] for g in sil_entries]).astype(np.float32)
+        )
+        sil_gallery = {id(g): normalized[i] for i, g in enumerate(sil_entries)}
 
     def _norm_centered(v: np.ndarray | None) -> np.ndarray | None:
         if v is None:
@@ -202,7 +233,14 @@ def match_probe_against_gallery(
             for g in entries:
                 if exclude_same_angle and g["angle"] == p_angle:
                     continue
-                s_sil = float(np.dot(p_sil, g["sil"])) if (p_sil is not None and g["sil"] is not None) else None
+                if p_sil is not None and g["sil"] is not None and sil_mean is not None:
+                    p_sil_c = center_and_normalize_embedding(p_sil, sil_mean)
+                    g_sil_c = sil_gallery[id(g)]
+                    s_sil = float(
+                        np.sum(p_sil_c.reshape(16, 256) * g_sil_c.reshape(16, 256), axis=1).mean()
+                    )
+                else:
+                    s_sil = None
                 g_skel_c = _norm_centered(g.get("skel"))
                 s_skel = float(np.dot(p_skel_c, g_skel_c)) if (p_skel_c is not None and g_skel_c is not None) else None
                 if s_sil is not None and s_skel is not None:

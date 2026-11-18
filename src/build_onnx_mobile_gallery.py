@@ -10,6 +10,7 @@ import onnxruntime as ort
 from ultralytics import YOLO
 
 from phase2_extract_and_visualize import align_silhouette_opengait
+from silhouette_embedding import center_and_normalize_gallery
 
 TRIMMED_ROOT = Path(r"c:\Users\angel.roman\Downloads\ProyectoIA\dataset_trimmed\subjects")
 MOBILE_ASSETS = Path(r"c:\Users\angel.roman\Downloads\ProyectoIA\mobile_assets")
@@ -68,10 +69,25 @@ def main():
         print(f"[OK] {subj}: {takes_done} tomas -> total {len(sil_vecs)} vectores", flush=True)
 
     ANDROID_ASSETS.mkdir(parents=True, exist_ok=True)
-    sil_mat = np.stack(sil_vecs, axis=0).astype(np.float32)
+    if not sil_vecs:
+        raise RuntimeError("No se generaron embeddings; no se puede construir la galería móvil.")
+    sil_mat, sil_mean = center_and_normalize_gallery(
+        np.stack(sil_vecs, axis=0).astype(np.float32)
+    )
     (ANDROID_ASSETS / "gallery_sil.bin").write_bytes(sil_mat.tobytes())
+    (ANDROID_ASSETS / "gallery_sil_mean.bin").write_bytes(sil_mean.tobytes())
     (ANDROID_ASSETS / "gallery_index.json").write_text(
-        json.dumps({"num_entries": len(entries_meta), "entries": entries_meta}, ensure_ascii=False),
+        json.dumps(
+            {
+                "num_entries": len(entries_meta),
+                "sil_dim": 4096,
+                "sil_parts": 16,
+                "sil_channels": 256,
+                "sil_layout": "part-major-v1",
+                "entries": entries_meta,
+            },
+            ensure_ascii=False,
+        ),
         encoding="utf-8",
     )
     for fn in ("gaitbase_mobile.onnx", "yolov8n-seg-512.onnx", "yolov8n-pose-512.onnx"):
