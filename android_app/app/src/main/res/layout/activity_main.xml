@@ -4,9 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0D1117">
+    android:background="#070A12">
 
-    <!-- Vista previa de la cámara en vivo -->
+    <!-- Visor de Cámara Principal -->
     <androidx.camera.view.PreviewView
         android:id="@+id/previewView"
         android:layout_width="0dp"
@@ -17,7 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Capa de dibujo de esqueleto, siluetas y reproducción de video -->
+    <!-- Capa de dibujo de esqueleto biométrico y reproducción de video -->
     <ImageView
         android:id="@+id/overlayView"
         android:layout_width="0dp"
@@ -28,42 +28,93 @@
         app:layout_constraintStart_toStartOf="@id/previewView"
         app:layout_constraintEnd_toEndOf="@id/previewView" />
 
-    <!-- Badge indicador de modo actual -->
-    <TextView
-        android:id="@+id/modeBadge"
+    <!-- HUD Superior: Indicadores de Sistema -->
+    <LinearLayout
+        android:id="@+id/topHudBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="12dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Badge de Modo Activo -->
+        <TextView
+            android:id="@+id/modeBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#DD0F172A"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:text="● MODO CÁMARA EN VIVO"
+            android:textColor="#38BDF8"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:elevation="4dp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <!-- Badge de Motor Offline -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#DD0F172A"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="6dp"
+            android:text="⚡ 31 SUJETOS OFFLINE"
+            android:textColor="#34D399"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:elevation="4dp" />
+    </LinearLayout>
+
+    <!-- Miniatura de Silueta Normalizada OpenGait (HUD Flotante) -->
+    <LinearLayout
+        android:id="@+id/silContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp"
-        android:background="#CC161B22"
-        android:paddingHorizontal="10dp"
-        android:paddingVertical="4dp"
-        android:text="● MODO CÁMARA EN VIVO"
-        android:textColor="#58A6FF"
-        android:textSize="12sp"
-        android:textStyle="bold"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_marginEnd="14dp"
+        android:layout_marginTop="56dp"
+        android:background="#CC0F172A"
+        android:padding="5dp"
+        android:elevation="6dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Miniatura de silueta normalizada OpenGait 64x44 -->
-    <ImageView
-        android:id="@+id/silhouettePreview"
-        android:layout_width="72dp"
-        android:layout_height="105dp"
-        android:layout_margin="12dp"
-        android:background="#CC000000"
-        android:padding="2dp"
-        android:scaleType="fitCenter"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <ImageView
+            android:id="@+id/silhouettePreview"
+            android:layout_width="66dp"
+            android:layout_height="96dp"
+            android:background="#000000"
+            android:scaleType="fitCenter" />
 
-    <!-- Panel de control inferior -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="SILUETA 64×44"
+            android:textColor="#94A3B8"
+            android:textSize="8sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Panel de Control Inferior Estilo Glassmorphism -->
     <LinearLayout
         android:id="@+id/bottomPanel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#161B22"
-        android:padding="12dp"
+        android:background="#F00F172A"
+        android:padding="16dp"
+        android:elevation="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -75,76 +126,106 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="12dp">
+
+            <div
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/videoProgressText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Analizando video: 0%"
-                android:textColor="#58A6FF"
-                android:textSize="13sp"
+                android:textColor="#38BDF8"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <ProgressBar
                 android:id="@+id/videoProgressBar"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
-                android:layout_height="8dp"
-                android:layout_marginTop="4dp"
+                android:layout_height="6dp"
+                android:layout_marginTop="6dp"
                 android:max="100"
                 android:progress="0"
-                android:progressTint="#58A6FF" />
+                android:progressTint="#38BDF8" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/statusText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Cargando modelos offline..."
-            android:textColor="#7EE787"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/top3Text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Top-3: --"
-            android:textColor="#C9D1D9"
-            android:textSize="13sp" />
-
-        <!-- Botonera de acciones -->
+        <!-- Tarjeta de Identificación Biométrica -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:orientation="vertical"
+            android:background="#991E293B"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/statusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Cargando modelos offline..."
+                android:textColor="#F8FAFC"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/top3Text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Top-3: --"
+                android:textColor="#94A3B8"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Botonera de Acciones -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:orientation="horizontal">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnToggle"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_weight="1"
                 android:text="Iniciar"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#030712"
+                app:backgroundTint="#38BDF8"
+                app:cornerRadius="12dp"
                 android:enabled="false"
-                android:layout_marginEnd="6dp" />
+                android:layout_marginEnd="8dp" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnReset"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_height="50dp"
+                android:layout_weight="0.8"
                 android:text="Reiniciar"
-                android:layout_marginEnd="6dp" />
+                android:textSize="12sp"
+                android:textColor="#F8FAFC"
+                app:backgroundTint="#1E293B"
+                app:strokeColor="#334155"
+                app:strokeWidth="1dp"
+                app:cornerRadius="12dp"
+                android:layout_marginEnd="8dp" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnVideo"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Importar Video" />
+                android:layout_height="50dp"
+                android:layout_weight="1.1"
+                android:text="Importar Video"
+                android:textSize="12sp"
+                android:textColor="#F8FAFC"
+                app:backgroundTint="#1E293B"
+                app:strokeColor="#38BDF8"
+                app:strokeWidth="1dp"
+                app:cornerRadius="12dp" />
         </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

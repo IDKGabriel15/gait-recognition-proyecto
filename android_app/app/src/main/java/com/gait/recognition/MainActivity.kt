@@ -3,6 +3,7 @@ package com.gait.recognition
 import ai.onnxruntime.OrtEnvironment
 import android.Manifest
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -107,7 +108,7 @@ class MainActivity : AppCompatActivity() {
                 switchToCameraMode()
             } else {
                 isAnalyzing = !isAnalyzing
-                btnToggle.text = if (isAnalyzing) "Detener" else "Iniciar"
+                updateToggleButtonState()
                 if (!isAnalyzing && votes.isNotEmpty()) {
                     showFinalConclusion()
                 }
@@ -128,8 +129,9 @@ class MainActivity : AppCompatActivity() {
                 yolo = YoloProcessor(this, ortEnv)
                 gaitEngine = GaitEngine(this, ortEnv)
                 runOnUiThread {
-                    statusText.text = "Modelos listos (31 sujetos offline). Presiona Iniciar."
+                    statusText.text = "Sistema biométrico listo. Presiona Iniciar."
                     btnToggle.isEnabled = true
+                    updateToggleButtonState()
                 }
             } catch (e: Exception) {
                 runOnUiThread { statusText.text = "Error cargando modelos: ${e.message}" }
@@ -210,14 +212,35 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateToggleButtonState() {
+        when (currentMode) {
+            AppMode.VIDEO -> {
+                btnToggle.text = "↺ Volver a Cámara"
+                btnToggle.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#10B981"))
+                btnToggle.setTextColor(Color.WHITE)
+            }
+            AppMode.CAMERA -> {
+                if (isAnalyzing) {
+                    btnToggle.text = "⏹ Detener"
+                    btnToggle.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#F43F5E"))
+                    btnToggle.setTextColor(Color.WHITE)
+                } else {
+                    btnToggle.text = "▶ Iniciar"
+                    btnToggle.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#38BDF8"))
+                    btnToggle.setTextColor(Color.parseColor("#030712"))
+                }
+            }
+        }
+    }
+
     private fun switchToCameraMode() {
         currentMode = AppMode.CAMERA
         videoProgressLayout.visibility = View.GONE
         previewView.visibility = View.VISIBLE
         modeBadge.text = "● MODO CÁMARA EN VIVO"
-        modeBadge.setTextColor(Color.parseColor("#58A6FF"))
-        btnToggle.text = "Iniciar"
+        modeBadge.setTextColor(Color.parseColor("#38BDF8"))
         isAnalyzing = false
+        updateToggleButtonState()
         resetSession()
         bindCameraUseCases()
     }
@@ -249,7 +272,7 @@ class MainActivity : AppCompatActivity() {
         videoProgressText.text = "Cargando archivo de video..."
         modeBadge.text = "● MODO ANÁLISIS DE VIDEO"
         modeBadge.setTextColor(Color.parseColor("#FFA657"))
-        btnToggle.text = "Volver a Cámara"
+        updateToggleButtonState()
         statusText.text = "Preparando video..."
 
         thread {
@@ -368,19 +391,24 @@ class MainActivity : AppCompatActivity() {
         val known = votes.filterKeys { it != "Desconocido" }
         val knownTotal = known.values.sum()
         val winner = known.maxByOrNull { it.value }
-        val finalId = if (
+        val (finalId, confPct) = if (
             winner != null && total > 0 && knownTotal > 0 &&
             (winner.value.toFloat() / total >= 0.12f) &&
             (winner.value.toFloat() / knownTotal >= 0.50f)
         ) {
-            winner.key
+            winner.key to ((winner.value.toFloat() / total) * 100).toInt()
         } else {
-            "Desconocido"
+            "Desconocido" to (if (total > 0) (((votes["Desconocido"] ?: 0).toFloat() / total) * 100).toInt() else 0)
         }
+
+        val topVotes = votes.entries.sortedByDescending { it.value }.take(4).joinToString("\n") { (k, v) ->
+            "  • $k: $v votos (${if (total > 0) ((v.toFloat() / total) * 100).toInt() else 0}%)"
+        }
+
         AlertDialog.Builder(this)
-            .setTitle("Conclusión Final")
-            .setMessage("Identidad: $finalId\n\nVotos: $votes")
-            .setPositiveButton("OK", null)
+            .setTitle("🎯 Conclusión Biométrica")
+            .setMessage("Sujeto Identificado:\n$finalId ($confPct% de consenso)\n\nTotal de cuadros evaluados: $total\n\nDistribución de Votos:\n$topVotes")
+            .setPositiveButton("Aceptar", null)
             .show()
     }
 
