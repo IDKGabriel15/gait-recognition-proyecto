@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exposición Técnica — Reconocimiento Biométrico de Marcha (31 Sujetos)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-4 md:p-6 m-0">
+  <div class="max-w-6xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span class="text-xs font-mono uppercase tracking-wider px-2.5 py-1 rounded bg-[var(--secondary)] text-[var(--secondary-foreground)]">
+            Presentación de Ingeniería &amp; Evaluación Abierta
+          </span>
+          <h1 class="text-2xl md:text-3xl font-bold mt-2">
+            Reconocimiento Biométrico de Marcha: Fusión Silueta (GaitBase) + Esqueleto 2D
+          </h1>
+          <p class="text-sm text-[var(--muted-foreground)] mt-1">
+            Pipeline end-to-end sobre dataset propio (31 sujetos, 1–3 cámaras asíncronas, GUI en tiempo real y APK Android 100% Offline)
+          </p>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+          <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg px-3 py-2">
+            <div class="text-lg font-bold font-mono">31</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Sujetos Reales</div>
+          </div>
+          <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg px-3 py-2">
+            <div class="text-lg font-bold font-mono">1,290</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Secuencias Galería</div>
+          </div>
+          <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg px-3 py-2">
+            <div class="text-lg font-bold font-mono text-[var(--success)]">100.0%</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Top-1 (201 Probes)</div>
+          </div>
+          <div class="bg-[var(--background)] border border-[var(--border)] rounded-lg px-3 py-2">
+            <div class="text-lg font-bold font-mono text-[var(--warning)]">89.8%</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Cross-View 45°</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex flex-wrap gap-2 pt-3 border-t border-[var(--border)]" id="tabBar">
+        <button onclick="showTab('pipeline')" id="btn-pipeline" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">
+          1. Dataset &amp; Pipeline (Fases 0–4)
+        </button>
+        <button onclick="showTab('math')" id="btn-math" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--secondary)] text-[var(--secondary-foreground)]">
+          2. Parámetros &amp; Matemática
+        </button>
+        <button onclick="showTab('matrices')" id="btn-matrices" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--secondary)] text-[var(--secondary-foreground)]">
+          3. Matrices de Confusión Reales
+        </button>
+        <button onclick="showTab('problems')" id="btn-problems" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--secondary)] text-[var(--secondary-foreground)]">
+          4. Problemas Encontrados &amp; Limitaciones
+        </button>
+        <button onclick="showTab('qa')" id="btn-qa" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--secondary)] text-[var(--secondary-foreground)]">
+          5. Guía de Exposición &amp; Preguntas del Jurado
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 1: PIPELINE -->
+    <div id="tab-pipeline" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+          <h2 class="text-base font-bold">Radiografía Real del Dataset Propio</h2>
+          <p class="text-xs text-[var(--muted-foreground)]">
+            No partimos de un dataset académico pre-recortado, sino de videos crudos grabados en pasillo de 4.0 m con 3 cámaras a diferentes tasas de cuadros:
+          </p>
+          <ul class="text-xs space-y-2">
+            <li class="flex justify-between border-b border-[var(--border)] pb-1">
+              <span class="text-[var(--muted-foreground)]">Carpetas crudas analizadas:</span>
+              <span class="font-mono font-semibold">37 → 31 sujetos + 3 *Prueba + 1 calibración</span>
+            </li>
+            <li class="flex justify-between border-b border-[var(--border)] pb-1">
+              <span class="text-[var(--muted-foreground)]">Geometría física (`medidas_fisicas.json`):</span>
+              <span class="font-mono font-semibold">Pasillo 4.0 m | Dist. 2.5 m | Altura 95 cm</span>
+            </li>
+            <li class="flex justify-between border-b border-[var(--border)] pb-1">
+              <span class="text-[var(--muted-foreground)]">Asimetría de FPS entre cámaras:</span>
+              <span class="font-mono font-semibold">`frente`: 30.0 fps | `45_izq`/`45_der`: ~8.9 fps</span>
+            </li>
+            <li class="flex justify-between border-b border-[var(--border)] pb-1">
+              <span class="text-[var(--muted-foreground)]">Tomas con cámaras faltantes (1 o 2 ángulos):</span>
+              <span class="font-mono font-semibold">22 de 317 tomas (manejadas sin dependencia)</span>
+            </li>
+            <li class="flex justify-between">
+              <span class="text-[var(--muted-foreground)]">Partición estricta sin fuga de datos (Zero Leakage):</span>
+              <span class="font-mono font-semibold">Gallery: toma_01..07 (215) | Probe: toma_08..11 (98)</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+          <h2 class="text-base font-bold">¿Por qué Enfoque 1 Híbrido (Transfer Learning + Biometría)?</h2>
+          <p class="text-xs text-[var(--muted-foreground)]">
+            Entrenar una red profunda desde cero con solo 31 personas sobreajustaría a la ropa del día de grabación. En su lugar combinamos un extractor preentrenado en 20,000 sujetos con geometría articular:
+          </p>
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+              <div class="font-semibold">Fase 0 &amp; 1 — Manifiesto y Smart Trimmer (`phase1_trim.py`)</div>
+              <div class="text-[var(--muted-foreground)] mt-0.5">
+                Cada video dura ~19.4 s e incluye pausas y giros en los extremos. Calculamos la velocidad horizontal del centroide (|vx| &ge; 85 px/s por &ge; 1.4 s) en la cámara ancla y recortamos todas las cámaras sincronizadas por `master_timestamp_ms` en 3 a 5 pasadas puras (`L2R` / `R2L`).
+              </div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+              <div class="font-semibold">Fase 2 — Extracción Dual (`phase2_extract_and_visualize.py`)</div>
+              <div class="text-[var(--muted-foreground)] mt-0.5">
+                `YOLOv8n-seg` (`imgsz=512`) extrae la máscara humana, la recorta y centra por centro de masa horizontal al estándar `64×44` de OpenGait. `YOLOv8n-pose` extrae los 17 keypoints COCO.
+              </div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+              <div class="font-semibold">Fase 3 &amp; 4 — Fusión Multi-Vista, GUI y APK Offline</div>
+              <div class="text-[var(--muted-foreground)] mt-0.5">
+                `GaitBase_DA` (ResNet9 + Temporal Max Pooling + HPP 16 franjas) genera un vector `4096-D` + Descriptor de Esqueleto `99-D`. Desplegado en escritorio (`app_gui.py`) y en Android 100% offline (`ONNX Runtime Mobile`).
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: MATH & PARAMETERS -->
+    <div id="tab-math" class="hidden space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-2">
+          <div class="text-xs font-mono text-[var(--primary)] font-bold">RAMA 1: SILUETA (4096-D)</div>
+          <h3 class="text-sm font-bold">Centrado por 16 Franjas + Top-8 Simétrico</h3>
+          <p class="text-xs text-[var(--muted-foreground)]">
+            `GaitBase` divide la silueta `64×44` en 16 franjas horizontales de 256 canales (`16 × 256`).
+          </p>
+          <ul class="text-xs space-y-1.5 text-[var(--muted-foreground)] list-disc pl-4">
+            <li><strong>Problema inicial:</strong> El vector crudo tenía un sesgo compartido entre todos los humanos (similitud base ~0.95).</li>
+            <li><strong>Solución (`silhouette_embedding.py`):</strong> Restar la media de la galería por cada franja `p` y normalizar L2 cada franja individualmente.</li>
+            <li><strong>Invarianza a ropa (`Top-8 simétrico`):</strong> Ordenamos las 16 similitudes por franja y promediamos solo las <strong>8 mejores (`top_k = 8`)</strong> sin fijar si están arriba o abajo. Si cambia pantalón a shorts o playera a chamarra, ignora la mitad alterada.</li>
+          </ul>
+        </div>
+
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-2">
+          <div class="text-xs font-mono text-[var(--primary)] font-bold">RAMA 2: ESQUELETO (99-D)</div>
+          <h3 class="text-sm font-bold">Descriptor Biomecánico Invariante a Escala</h3>
+          <p class="text-xs text-[var(--muted-foreground)]">
+            Normaliza cada cuadro restando el centro de cadera `(kpt[11]+kpt[12])/2` y dividiendo entre la mediana de la longitud del torso.
+          </p>
+          <ul class="text-xs space-y-1.5 text-[var(--muted-foreground)] list-disc pl-4">
+            <li><strong>Postura espacial (`68 dims`):</strong> Media (`34`) y desviación estándar (`34`) de las 17 articulaciones normalizadas.</li>
+            <li><strong>Dinámica articular (`24 dims`):</strong> Media, std, percentil 10 y percentil 90 de 6 ángulos: rodillas izq/der, caderas izq/der y codos izq/der.</li>
+            <li><strong>Geometría y zancada (`7 dims`):</strong> Ancho de hombros, cadera, longitud de piernas y apertura máxima/media de tobillos.</li>
+          </ul>
+        </div>
+
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-2">
+          <div class="text-xs font-mono text-[var(--primary)] font-bold">FUSIÓN &amp; DECISIÓN OPEN-SET</div>
+          <h3 class="text-sm font-bold">Hiperparámetros Calibrados</h3>
+          <div class="text-xs space-y-2">
+            <div class="p-2 rounded bg-[var(--background)] border border-[var(--border)] font-mono">
+              Score = 0.65 · Sil_Top8 + 0.35 · Skel_Centered
+            </div>
+            <ul class="space-y-1 text-[var(--muted-foreground)]">
+              <li><strong>`alpha_sil = 0.65` / `skel = 0.35`:</strong> Equilibra poder discriminativo de `GaitBase` con invarianza a ropa del esqueleto.</li>
+              <li><strong>`min_score = 0.540` | `min_margin = 0.025`:</strong> Si el #1 no supera `0.540` o no le saca `+0.025` al #2, la ventana vota `Desconocido`.</li>
+              <li><strong>Consenso de video completo:</strong> La identidad ganadora requiere &ge; 50% de los votos conocidos y &ge; 12% de todas las ventanas activas.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive What-If Tradeoff Explorer -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-sm font-bold">Explorador Interactivo de Ablación: Peso Silueta vs. Esqueleto (`alpha_sil`)</h3>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Mueve el control para mostrar al jurado cómo se comporta el sistema al variar el peso entre Silueta Top-8 y Esqueleto 2D (datos medidos en `task-690` y `task-734`):
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <input id="alphaSlider" type="range" min="0" max="5" step="1" value="3" oninput="updateAblation(this.value)" class="accent-[var(--primary)]" />
+            <span id="alphaLabel" class="font-mono text-xs font-bold px-2.5 py-1 rounded bg-[var(--background)] border border-[var(--border)]">
+              alpha_sil = 0.65 (65% Sil / 35% Skel) — ÓPTIMO ACTUAL
+            </span>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center pt-1">
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+            <div id="ab-probes" class="text-lg font-bold font-mono text-[var(--success)]">201/201 (100.0%)</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Probes Lab (31 sujetos)</div>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+            <div id="ab-prueba3" class="text-lg font-bold font-mono text-[var(--success)]">8/8 (100.0%)</div>
+            <div class="text-xs text-[var(--muted-foreground)]">*Prueba 3 Cámaras (Ropa distinta)</div>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+            <div id="ab-prueba1" class="text-lg font-bold font-mono">6/8 (75.0% por pasada / 100% video)</div>
+            <div class="text-xs text-[var(--muted-foreground)]">*Prueba 1 Cámara (Shorts vs Jeans)</div>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+            <div id="ab-whatsapp" class="text-lg font-bold font-mono text-[var(--success)]">#1 JoseLuis (mg +0.040)</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Video Casero WhatsApp (Cámara cerca)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: CONFUSION MATRICES -->
+    <div id="tab-matrices" class="hidden space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Matrix 1: Open-Set Verification -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+          <h3 class="text-sm font-bold">1. Matriz de Confusión Open-Set (Conocidos vs. Desconocidos)</h3>
+          <p class="text-xs text-[var(--muted-foreground)]">
+            Protocolo Leave-5-Subjects-Out (`test_diagnostics.py`): 201 pasadas de sujetos registrados vs. 42 pasadas de 5 sujetos eliminados de la galería.
+          </p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs border-collapse">
+              <thead>
+                <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)]">
+                  <th class="p-2 text-left">Condición Real \ Predicción</th>
+                  <th class="p-2 text-center">Identificado Correcto (#1)</th>
+                  <th class="p-2 text-center">Identificado Erróneo (Falso +)</th>
+                  <th class="p-2 text-center">Rechazado (`Desconocido`)</th>
+                </tr>
+              </thead>
+              <tbody class="font-mono">
+                <tr class="border-b border-[var(--border)]">
+                  <td class="p-2 font-sans font-semibold">Sujeto en Galería (n = 201)</td>
+                  <td class="p-2 text-center font-bold text-[var(--success)]">201 (100.0% TAR)</td>
+                  <td class="p-2 text-center">0 (0.0%)</td>
+                  <td class="p-2 text-center">0 (0.0%)</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-sans font-semibold">Sujeto NO Registrado (n = 42)</td>
+                  <td class="p-2 text-center text-[var(--muted-foreground)]">N/A</td>
+                  <td class="p-2 text-center font-bold text-[var(--success)]">0 (0.0% FAR)</td>
+                  <td class="p-2 text-center font-bold text-[var(--success)]">42 (100.0% TRR)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="text-xs text-[var(--muted-foreground)] bg-[var(--background)] p-2.5 rounded-lg border border-[var(--border)]">
+            <strong>Separación estadística medida:</strong> Los sujetos conocidos promedian score <code>0.838</code> (margen medio <code>+0.290</code>), mientras que los desconocidos promedian <code>0.513</code> (margen medio <code>+0.029</code>).
+          </div>
+        </div>
+
+        <!-- Matrix 2: Multi-View & Cross-View Summary -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+          <h3 class="text-sm font-bold">2. Desempeño por Escenario de Cámara (31 Sujetos)</h3>
+          <p class="text-xs text-[var(--muted-foreground)]">
+            Comparativa cuando el ángulo de prueba existe en la galería vs. cuando se oculta deliberadamente ese ángulo de la galería (Cross-View):
+          </p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs border-collapse">
+              <thead>
+                <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)]">
+                  <th class="p-2 text-left">Escenario de Prueba</th>
+                  <th class="p-2 text-center">Pasadas</th>
+                  <th class="p-2 text-center">Top-1</th>
+                  <th class="p-2 text-center">Top-5</th>
+                  <th class="p-2 text-left">Confusiones Exactas</th>
+                </tr>
+              </thead>
+              <tbody class="font-mono">
+                <tr class="border-b border-[var(--border)]">
+                  <td class="p-2 font-sans font-semibold">Multi-cámara (`1 a 3 disp.`)</td>
+                  <td class="p-2 text-center">201</td>
+                  <td class="p-2 text-center font-bold text-[var(--success)]">100.0%</td>
+                  <td class="p-2 text-center">100.0%</td>
+                  <td class="p-2 font-sans text-[var(--muted-foreground)]">0 errores (201/201)</td>
+                </tr>
+                <tr class="border-b border-[var(--border)]">
+                  <td class="p-2 font-sans font-semibold">Solo `frente` (90° lateral, 30 fps)</td>
+                  <td class="p-2 text-center">201</td>
+                  <td class="p-2 text-center font-bold text-[var(--success)]">100.0%</td>
+                  <td class="p-2 text-center">100.0%</td>
+                  <td class="p-2 font-sans text-[var(--muted-foreground)]">0 errores (201/201)</td>
+                </tr>
+                <tr class="border-b border-[var(--border)]">
+                  <td class="p-2 font-sans font-semibold">Solo `45_izq` (45° diag, 9 fps)</td>
+                  <td class="p-2 text-center">197</td>
+                  <td class="p-2 text-center font-bold text-[var(--success)]">99.5%</td>
+                  <td class="p-2 text-center">100.0%</td>
+                  <td class="p-2 font-sans text-[var(--muted-foreground)]">1 fallo: `JavierCruz → Alejandro`</td>
+                </tr>
+                <tr class="border-b border-[var(--border)]">
+                  <td class="p-2 font-sans font-semibold">Solo `45_der` (45° diag, 9 fps)</td>
+                  <td class="p-2 text-center">177</td>
+                  <td class="p-2 text-center font-bold text-[var(--success)]">99.4%</td>
+                  <td class="p-2 text-center">100.0%</td>
+                  <td class="p-2 font-sans text-[var(--muted-foreground)]">1 fallo: `FernandoLopez → JoseGastelum`</td>
+                </tr>
+                <tr class="border-b border-[var(--border)]">
+                  <td class="p-2 font-sans font-semibold">Cross-View `45_der` (sin `45_der`)</td>
+                  <td class="p-2 text-center">177</td>
+                  <td class="p-2 text-center font-bold text-[var(--warning)]">89.8%</td>
+                  <td class="p-2 text-center">99.4%</td>
+                  <td class="p-2 font-sans text-[var(--muted-foreground)]">18 fallos (`Bernardo ↔ Carlos/Diego`)</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-sans font-semibold">Cross-View `frente` (90° vs 45°)</td>
+                  <td class="p-2 text-center">201</td>
+                  <td class="p-2 text-center font-bold text-[var(--error)]">55.7%</td>
+                  <td class="p-2 text-center">86.1%</td>
+                  <td class="p-2 font-sans text-[var(--muted-foreground)]">Salto de 45° en proyección 2D</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Confusion Breakdown -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-2">
+        <h3 class="text-sm font-bold">3. Análisis de Pares de Confusión y Casos Fuera de Laboratorio</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)] space-y-1">
+            <div class="font-bold">¿Por qué fallan 18/177 en `Cross-View 45_der`?</div>
+            <p class="text-[var(--muted-foreground)]">
+              Cuando se elimina `45_der` de la galería, el sistema compara una vista oblicua derecha contra `45_izq` (oblicua opuesta) y `frente`. Los pares confundidos (`BernardoBejarano → CarlosEduardo / DiegoVelazquez` y `BrunoLopez → FernandoRivas`) corresponden a sujetos de complexión y cadencia muy similar cuya proyección diagonal se solapa.
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)] space-y-1">
+            <div class="font-bold">Validación con Cambio de Ropa (`*Prueba`: 8/8 = 100%)</div>
+            <p class="text-[var(--muted-foreground)]">
+              En `AlejandroPrueba`, el sujeto cambió de pantalón largo (en galería) a bermudas/shorts. Las franjas inferiores `8..15` cayeron a correlación negativa (`-0.28`), pero el <strong>Top-8 simétrico + 35% Esqueleto</strong> mantuvo 8/8 aciertos en 3 cámaras y victoria por consenso (`17/36` ventanas, 0 votos falsos) usando 1 sola cámara.
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)] space-y-1">
+            <div class="font-bold">Videos No Controlados (Pasillo / Casa WhatsApp)</div>
+            <p class="text-[var(--muted-foreground)]">
+              En el video casero de `JoseLuis` (WhatsApp, lateral muy cerca), `Silueta Top-8` lo ubicó <strong>#1 entre los 31 sujetos (`0.560`, margen `+0.054`)</strong>. En videos frontales puros (`0°`/`180°` de `GabrielRoman` y `BernardoBejarano`), `GaitBase` logra #1 en Gabriel (`0.916`) pero baja a #4 en Bernardo cuando se cortan las piernas al acercarse a la lente.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: PROBLEMS & LIMITATIONS -->
+    <div id="tab-problems" class="hidden space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+          <h3 class="text-sm font-bold text-[var(--success)]">Problemas Técnicos Resueltos Durante el Desarrollo</h3>
+          <div class="space-y-2.5 text-xs">
+            <div class="p-2.5 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+              <div class="font-semibold">1. Siluetas cuadradas/pixeladas en Android (`IoU 90.7% → 95.9%`)</div>
+              <div class="text-[var(--muted-foreground)] mt-0.5">
+                <code>yolov8n-seg</code> produce prototipos a <code>128×128</code> (donde una persona mide ~24×8 px). Binarizar en <code>128×128</code> generaba bloques cuadrados de 4×4 px. Se solucionó interpolando bilinealmente los logits flotantes continuos a <code>512×512</code> <em>antes</em> de aplicar el umbral <code>logit &gt; 0</code>.
+              </div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+              <div class="font-semibold">2. Deformación de aspecto `1.78×` entre ONNX y PyTorch</div>
+              <div class="text-[var(--muted-foreground)] mt-0.5">
+                El modelo ONNX fijo a <code>512×512</code> devolvía máscaras con padding cuadrado de letterbox; al redimensionarlas a <code>1280×720</code> se ensanchaban las siluetas un <code>1.78×</code> (`1423` vs `834` px). Se corrigió exportando la galería móvil directamente en proporción física real `1:1`.
+              </div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+              <div class="font-semibold">3. Tiempos muertos y desfase de FPS (30 fps vs 9 fps)</div>
+              <div class="text-[var(--muted-foreground)] mt-0.5">
+                Alimentar los 20 s completos incluía giros y pausas que contaminaban el Temporal Max Pooling. El Smart Trimmer y el filtro de movimiento en vivo descartan cuadros con baja velocidad o cuerpo incompleto.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+          <h3 class="text-sm font-bold text-[var(--warning)]">Limitaciones Actuales Abiertas a Discusión / Trabajo Futuro</h3>
+          <div class="space-y-2.5 text-xs">
+            <div class="p-2.5 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+              <div class="font-semibold">1. Sensibilidad al recorte vertical (Sujeto muy cerca de la cámara)</div>
+              <div class="text-[var(--muted-foreground)] mt-0.5">
+                Si la persona ocupa el 100% de la altura del video (cortando cabeza o pies) o usa calzado del mismo color que el piso (ej. sandalias claras sobre loseta clara), <code>align_silhouette_opengait</code> estira verticalmente el cuerpo restante a <code>64 px</code>, desplazando las 16 franjas horizontales de <code>GaitBase</code>.
+              </div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+              <div class="font-semibold">2. Ángulos inéditos extremos (`0°` frontal puro / `180°` espaldas)</div>
+              <div class="text-[var(--muted-foreground)] mt-0.5">
+                Como la galería actual solo contiene vistas de `90°` y `45°`, al caminar en línea recta hacia la cámara (`0°`) desaparece la amplitud horizontal de la zancada en 2D y el descriptor de esqueleto 2D pierde precisión.
+              </div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+              <div class="font-semibold">3. Latencia en CPU móvil (~4–6 FPS en APK Offline)</div>
+              <div class="text-[var(--muted-foreground)] mt-0.5">
+                Ejecutar `YOLOv8n-seg` + `YOLOv8n-pose` a `512×512` más `GaitBase` 100% offline en CPU de celular procesa ~4–6 cuadros/seg. Para producción continua convendría cuantización INT8 / NNAPI o reemplazar las dos redes YOLO por un solo modelo multi-tarea (seg+pose).
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: SPEAKER GUIDE & Q&A -->
+    <div id="tab-qa" class="hidden space-y-4">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+        <h3 class="text-sm font-bold">Estructura Recomendada para tu Exposición (5 a 7 minutos)</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+            <div class="font-mono font-bold text-[var(--primary)]">Min 0:00 – 1:30</div>
+            <div class="font-semibold mt-1">1. El Problema y Dataset Real</div>
+            <p class="text-[var(--muted-foreground)] mt-0.5">
+              Explica que grabaron a 31 personas con 3 cámaras asíncronas (30 fps y 9 fps) en pasillo de 4 m, y que el reto real fue limpiar tiempos muertos y cámaras faltantes sin etiquetar a mano.
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+            <div class="font-mono font-bold text-[var(--primary)]">Min 1:30 – 3:30</div>
+            <div class="font-semibold mt-1">2. Cómo Funciona (Silueta + Esqueleto)</div>
+            <p class="text-[var(--muted-foreground)] mt-0.5">
+              Muestra la vista de 3 paneles: `YOLOv8-seg` genera la silueta `64×44` para `GaitBase` (centrado en 16 franjas + Top-8 simétrico) y `YOLOv8-pose` aporta 99 variables biomecánicas invariantes a la ropa.
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+            <div class="font-mono font-bold text-[var(--primary)]">Min 3:30 – 5:00</div>
+            <div class="font-semibold mt-1">3. Resultados y Matrices</div>
+            <p class="text-[var(--muted-foreground)] mt-0.5">
+              Presenta el 100% en Probes (`201/201`), 100% en `*Prueba` con cambio de ropa (`8/8`), 100% rechazo de desconocidos, y muestra con honestidad la caída a `89.8%` / `55.7%` en Cross-View extremo.
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)]">
+            <div class="font-mono font-bold text-[var(--primary)]">Min 5:00 – 7:00</div>
+            <div class="font-semibold mt-1">4. Limitaciones y Demo en Vivo</div>
+            <p class="text-[var(--muted-foreground)] mt-0.5">
+              Explica el caso de WhatsApp (`JoseLuis`) y el bug del suavizado bilineal en Android. Abre la discusión preguntando a la audiencia qué opinan del balance Silueta vs. Esqueleto.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Jury Q&A Cards -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+        <h3 class="text-sm font-bold">Preguntas Difíciles del Jurado / Audiencia y Cómo Responderlas</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)] space-y-1">
+            <div class="font-bold">❓ "¿Realmente entrenaron una red o solo usaron un modelo preentrenado?"</div>
+            <p class="text-[var(--muted-foreground)]">
+              <strong>Respuesta:</strong> "Seguimos un esquema de <em>Transfer Learning Biométrico (Gallery vs. Probe)</em>, igual que el reconocimiento facial moderno. Con 31 personas, entrenar una red profunda desde cero sobreajustaría al color o corte de ropa de ese día. Usamos <code>GaitBase</code> preentrenado en 20,000 personas en exteriores (GREW) como extractor base, pero diseñamos nuestro propio <strong>centrado estadístico por 16 franjas sobre nuestra galería</strong>, el <strong>pooling simétrico Top-8</strong> y un <strong>descriptor biomecánico de 99 dimensiones</strong> de esqueleto, lo cual subió el Cross-View de 63% a 90% y el cambio de ropa a 100%."
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)] space-y-1">
+            <div class="font-bold">❓ "¿Cómo garantizan que no hubo fuga de datos (Data Leakage) en ese 100%?"</div>
+            <p class="text-[var(--muted-foreground)]">
+              <strong>Respuesta:</strong> "Separamos estrictamente por toma completa y por tiempo: las tomas <code>01</code> a <code>07</code> formaron la galería (`1,290` secuencias) y las tomas <code>08</code> a <code>11</code> (`201` pasadas) jamás fueron vistas al construir la galería. Además evaluamos con la carpeta externa <code>*Prueba</code> grabada aparte (incluso con cambio de pantalón a shorts) y con protocolo <em>Leave-5-Subjects-Out</em> para calibrar desconocidos."
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)] space-y-1">
+            <div class="font-bold">❓ "¿Qué pasa si la persona lleva mochila, chamarra gruesa o cambia a shorts?"</div>
+            <p class="text-[var(--muted-foreground)]">
+              <strong>Respuesta:</strong> "Lo comprobamos experimentalmente con <code>AlejandroPrueba</code> (cambió de jeans largos a shorts). En las 16 franjas horizontales de <code>GaitBase</code>, las 8 franjas inferiores cayeron a correlación negativa (<code>-0.28</code>). Para resolverlo sin parches fijos, implementamos <strong>Top-8 simétrico</strong> (toma las 8 mejores franjas de las 16 sin importar si están arriba o abajo) más <strong>35% de peso al esqueleto</strong> (que mide ángulos articulares y no ve la ropa)."
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)] space-y-1">
+            <div class="font-bold">❓ "¿Cuál es el punto más débil actual y cómo lo mejorarían en una fase 2?"</div>
+            <p class="text-[var(--muted-foreground)]">
+              <strong>Respuesta:</strong> "Tenemos dos límites claros: 1) si la persona camina tan cerca de la lente que se le cortan los pies o la cabeza, las 16 franjas horizontales se desfasan verticalmente; y 2) si camina a <code>0°</code> frontal puro cuando la galería solo tiene <code>45°/90°</code>. La mejora natural es agregar 1 toma frontal (<code>0°</code>) al registro de galería o migrar la rama de pose a <code>SkeletonGait++</code> (mapas de calor 2D/3D)."
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const tabs = ['pipeline', 'math', 'matrices', 'problems', 'qa'];
+    function showTab(active) {
+      tabs.forEach(t => {
+        const el = document.getElementById('tab-' + t);
+        const btn = document.getElementById('btn-' + t);
+        if (t === active) {
+          el.classList.remove('hidden');
+          btn.className = 'tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]';
+        } else {
+          el.classList.add('hidden');
+          btn.className = 'tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--secondary)] text-[var(--secondary-foreground)]';
+        }
+      });
+    }
+
+    const ablationData = [
+      { label: 'alpha_sil = 0.35 (35% Sil / 65% Skel)', probes: '200/201 (99.5%)', p3: '8/8 (100.0%)', p1: '8/8 (100.0%)', wa: '#2 JoseLuis (Skel 2D domina)' },
+      { label: 'alpha_sil = 0.50 (50% Sil / 50% Skel)', probes: '201/201 (100.0%)', p3: '8/8 (100.0%)', p1: '8/8 (100.0%)', wa: '#1 JoseLuis (mg +0.003 bajo)' },
+      { label: 'alpha_sil = 0.60 (60% Sil / 40% Skel)', probes: '201/201 (100.0%)', p3: '8/8 (100.0%)', p1: '7/8 (87.5%)', wa: '#1 JoseLuis (mg +0.037)' },
+      { label: 'alpha_sil = 0.65 (65% Sil / 35% Skel) — ÓPTIMO ACTUAL', probes: '201/201 (100.0%)', p3: '8/8 (100.0%)', p1: '6/8 (100% por video)', wa: '#1 JoseLuis (mg +0.040)' },
+      { label: 'alpha_sil = 0.75 (75% Sil / 25% Skel)', probes: '201/201 (100.0%)', p3: '8/8 (100.0%)', p1: '6/8 (100% por video)', wa: '#1 JoseLuis (mg +0.047)' },
+      { label: 'alpha_sil = 0.85 (85% Sil / 15% Skel)', probes: '201/201 (100.0%)', p3: '6/8 (75.0%)', p1: '4/8 (50.0%)', wa: '#1 JoseLuis (mg +0.052)' }
+    ];
+
+    function updateAblation(idx) {
+      const d = ablationData[idx];
+      document.getElementById('alphaLabel').textContent = d.label;
+      document.getElementById('ab-probes').textContent = d.probes;
+      document.getElementById('ab-prueba3').textContent = d.p3;
+      document.getElementById('ab-prueba1').textContent = d.p1;
+      document.getElementById('ab-whatsapp').textContent = d.wa;
+    }
+  </script>
+</body>
+</html>
