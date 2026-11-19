@@ -30,8 +30,8 @@ GALLERY_DB_PATH = Path(r"c:\Users\angel.roman\Downloads\ProyectoIA\outputs\galle
 
 def classify_with_unknown(
     ranked: list[tuple[str, float]],
-    min_score: float = 0.600,
-    min_margin: float = 0.050,
+    min_score: float = 0.540,
+    min_margin: float = 0.025,
 ) -> tuple[str, float, float]:
     """Determina si el Top-1 es válido o debe marcarse como Desconocido."""
     if not ranked:
@@ -50,9 +50,9 @@ def run_realtime_recognition(
     show: bool = False,
     window_frames: int = 60,
     eval_interval: int = 15,
-    alpha_sil: float = 0.85,
-    min_score: float = 0.600,
-    min_margin: float = 0.050,
+    alpha_sil: float = 0.65,
+    min_score: float = 0.540,
+    min_margin: float = 0.025,
 ):
     with open(GALLERY_DB_PATH, "rb") as f:
         gallery_db = pickle.load(f)
@@ -286,7 +286,8 @@ def run_realtime_recognition(
         known_votes = Counter({k: v for k, v in votes.items() if k != "Desconocido"})
         if known_votes:
             best_known, best_k_cnt = known_votes.most_common(1)[0]
-            if best_k_cnt / total_votes >= 0.25:
+            known_total = sum(known_votes.values())
+            if (best_k_cnt / total_votes >= 0.12) and (best_k_cnt / known_total >= 0.50):
                 final_identity, top_votes = best_known, best_k_cnt
             else:
                 final_identity, top_votes = "Desconocido", votes.get("Desconocido", 0)
@@ -342,8 +343,8 @@ def main():
     )
     parser.add_argument("--out-video", type=str, default=None)
     parser.add_argument("--show", action="store_true")
-    parser.add_argument("--min-score", type=float, default=0.600)
-    parser.add_argument("--min-margin", type=float, default=0.050)
+    parser.add_argument("--min-score", type=float, default=0.540)
+    parser.add_argument("--min-margin", type=float, default=0.025)
     args = parser.parse_args()
 
     sources = []

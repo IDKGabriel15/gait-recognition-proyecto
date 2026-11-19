@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private var gaitEngine: GaitEngine? = null
 
     private val silBuffer = ArrayDeque<FloatArray>(60)
+    private val kptBuffer = ArrayDeque<Array<FloatArray>>(60)
     private val motionHistory = ArrayDeque<Pair<Float, Float>>(5)
     private val votes = HashMap<String, Int>()
     private var isAnalyzing = false
@@ -117,6 +118,7 @@ class MainActivity : AppCompatActivity() {
     private fun resetSession() {
         synchronized(silBuffer) {
             silBuffer.clear()
+            kptBuffer.clear()
             motionHistory.clear()
         }
         votes.clear()
@@ -209,6 +211,10 @@ class MainActivity : AppCompatActivity() {
                 if (isWalkingNow && bh >= 0.20f) {
                     if (silBuffer.size >= 45) silBuffer.removeFirst()
                     silBuffer.addLast(res.alignedSil)
+                    if (res.keypoints != null) {
+                        if (kptBuffer.size >= 45) kptBuffer.removeFirst()
+                        kptBuffer.addLast(res.keypoints)
+                    }
                 }
             }
         }
@@ -216,14 +222,14 @@ class MainActivity : AppCompatActivity() {
 
         var top3Str = ""
         if (isWalkingNow && frameCounter % 6 == 0) {
-            val seq = synchronized(silBuffer) { silBuffer.toList() }
+            val (seq, kSeq) = synchronized(silBuffer) { silBuffer.toList() to kptBuffer.toList() }
             if (seq.size >= 10) {
-                val ranked = gaitEngine!!.identify(seq)
+                val ranked = gaitEngine!!.identify(seq, kSeq, bmp.width, bmp.height, alphaSil = 0.65f)
                 if (ranked.isNotEmpty()) {
                     val t1 = ranked[0]
                     val t2Score = if (ranked.size > 1) ranked[1].score else 0f
                     val margin = t1.score - t2Score
-                    if (t1.score >= 0.600f && margin >= 0.050f) {
+                    if (t1.score >= 0.540f && margin >= 0.025f) {
                         currentLabel = "${t1.subject} (${"%.2f".format(t1.score)})"
                         currentColor = Color.rgb(0, 230, 140)
                         votes[t1.subject] = (votes[t1.subject] ?: 0) + 1
@@ -252,8 +258,13 @@ class MainActivity : AppCompatActivity() {
     private fun showFinalConclusion() {
         val total = votes.values.sum()
         val known = votes.filterKeys { it != "Desconocido" }
+        val knownTotal = known.values.sum()
         val winner = known.maxByOrNull { it.value }
-        val finalId = if (winner != null && total > 0 && winner.value.toFloat() / total >= 0.25f) {
+        val finalId = if (
+            winner != null && total > 0 && knownTotal > 0 &&
+            (winner.value.toFloat() / total >= 0.12f) &&
+            (winner.value.toFloat() / knownTotal >= 0.50f)
+        ) {
             winner.key
         } else {
             "Desconocido"

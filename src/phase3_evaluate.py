@@ -136,7 +136,7 @@ def evaluate_probes(
 
 def main():
     parser = argparse.ArgumentParser(description="Fase 3: Galería y Evaluación")
-    parser.add_argument("--alpha-sil", type=float, default=0.78, help="Peso de silueta vs esqueleto")
+    parser.add_argument("--alpha-sil", type=float, default=0.65, help="Peso de silueta vs esqueleto")
     args = parser.parse_args()
 
     with open(MANIFEST_PATH, "r", encoding="utf-8") as f:

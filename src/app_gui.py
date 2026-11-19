@@ -42,8 +42,8 @@ class GaitAppGUI:
         self.worker_thread: threading.Thread | None = None
         self.video_sources: list[tuple[str, str]] = [("frente", "0")]
 
-        self.min_score_var = tk.DoubleVar(value=0.600)
-        self.min_margin_var = tk.DoubleVar(value=0.050)
+        self.min_score_var = tk.DoubleVar(value=0.540)
+        self.min_margin_var = tk.DoubleVar(value=0.025)
         self.save_video_var = tk.BooleanVar(value=False)
         self.status_var = tk.StringVar(value="Cargando modelos (GaitBase + YOLOv8 seg/pose)...")
 
@@ -304,7 +304,7 @@ class GaitAppGUI:
                         if s_emb is not None or k_emb is not None:
                             probe_views[angle] = (s_emb, k_emb)
                 if probe_views:
-                    current_top3 = match_probe_against_gallery(probe_views, self.gallery_db, alpha_sil=0.85)[:3]
+                    current_top3 = match_probe_against_gallery(probe_views, self.gallery_db, alpha_sil=0.65)[:3]
                     current_decision = classify_with_unknown(
                         current_top3,
                         min_score=float(self.min_score_var.get()),
@@ -373,7 +373,8 @@ class GaitAppGUI:
             known_votes = Counter({k: v for k, v in votes.items() if k != "Desconocido"})
             if known_votes:
                 best_k, best_cnt = known_votes.most_common(1)[0]
-                if best_cnt / total_votes >= 0.25:
+                known_total = sum(known_votes.values())
+                if (best_cnt / total_votes >= 0.12) and (best_cnt / known_total >= 0.50):
                     final_id, top_v = best_k, best_cnt
                 else:
                     final_id, top_v = "Desconocido", votes.get("Desconocido", 0)

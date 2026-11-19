@@ -184,7 +184,7 @@ def extract_skeleton_embedding(kpts_seq: np.ndarray, conf_thresh: float = 0.25) 
 def match_probe_against_gallery(
     probe_views: dict[str, tuple[np.ndarray | None, np.ndarray | None]],
     gallery_db: dict[str, list[dict]],
-    alpha_sil: float = 0.85,
+    alpha_sil: float = 0.65,
     exclude_same_angle: bool = False,
 ) -> list[tuple[str, float]]:
     """Compara un probe (1 a 3 ángulos) contra toda la galería sin depender de ningún ángulo.
@@ -236,9 +236,9 @@ def match_probe_against_gallery(
                 if p_sil is not None and g["sil"] is not None and sil_mean is not None:
                     p_sil_c = center_and_normalize_embedding(p_sil, sil_mean)
                     g_sil_c = sil_gallery[id(g)]
-                    s_sil = float(
-                        np.sum(p_sil_c.reshape(16, 256) * g_sil_c.reshape(16, 256), axis=1).mean()
-                    )
+                    part_sims = np.sum(p_sil_c.reshape(16, 256) * g_sil_c.reshape(16, 256), axis=1)
+                    # Top-8 simétrico de las 16 franjas (invariante a cambio de ropa arriba, en medio o abajo)
+                    s_sil = float(np.sort(part_sims)[-8:].mean())
                 else:
                     s_sil = None
                 g_skel_c = _norm_centered(g.get("skel"))
