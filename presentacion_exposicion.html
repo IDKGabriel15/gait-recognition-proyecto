@@ -58,7 +58,7 @@
           4. Problemas Encontrados &amp; Limitaciones
         </button>
         <button onclick="showTab('qa')" id="btn-qa" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--secondary)] text-[var(--secondary-foreground)]">
-          5. Guía de Exposición &amp; Preguntas del Jurado
+          5. Preguntas del Jurado &amp; Defensa Técnica
         </button>
       </div>
     </div>
@@ -69,16 +69,12 @@
         <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
           <h2 class="text-base font-bold">Radiografía Real del Dataset Propio</h2>
           <p class="text-xs text-[var(--muted-foreground)]">
-            No partimos de un dataset académico pre-recortado, sino de videos crudos grabados en pasillo de 4.0 m con 3 cámaras a diferentes tasas de cuadros:
+            No partimos de un dataset académico pre-recortado, sino de grabaciones de video reales con 3 cámaras asíncronas a diferentes tasas de cuadros:
           </p>
           <ul class="text-xs space-y-2">
             <li class="flex justify-between border-b border-[var(--border)] pb-1">
               <span class="text-[var(--muted-foreground)]">Carpetas crudas analizadas:</span>
               <span class="font-mono font-semibold">37 → 31 sujetos + 3 *Prueba + 1 calibración</span>
-            </li>
-            <li class="flex justify-between border-b border-[var(--border)] pb-1">
-              <span class="text-[var(--muted-foreground)]">Geometría física (`medidas_fisicas.json`):</span>
-              <span class="font-mono font-semibold">Pasillo 4.0 m | Dist. 2.5 m | Altura 95 cm</span>
             </li>
             <li class="flex justify-between border-b border-[var(--border)] pb-1">
               <span class="text-[var(--muted-foreground)]">Asimetría de FPS entre cámaras:</span>
@@ -366,24 +362,24 @@
         </div>
 
         <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
-          <h3 class="text-sm font-bold text-[var(--warning)]">Limitaciones Actuales Abiertas a Discusión / Trabajo Futuro</h3>
+          <h3 class="text-sm font-bold text-[var(--warning)]">Limitaciones Actuales del Modelo &amp; Trabajo Futuro</h3>
           <div class="space-y-2.5 text-xs">
             <div class="p-2.5 rounded-lg bg-[var(--background)] border border-[var(--border)]">
-              <div class="font-semibold">1. Sensibilidad al recorte vertical (Sujeto muy cerca de la cámara)</div>
+              <div class="font-semibold">1. Sensibilidad a Ángulos Frontales Puros (0° y 180° hacia la cámara)</div>
               <div class="text-[var(--muted-foreground)] mt-0.5">
-                Si la persona ocupa el 100% de la altura del video (cortando cabeza o pies) o usa calzado del mismo color que el piso (ej. sandalias claras sobre loseta clara), <code>align_silhouette_opengait</code> estira verticalmente el cuerpo restante a <code>64 px</code>, desplazando las 16 franjas horizontales de <code>GaitBase</code>.
+                Al caminar en línea recta hacia la lente, desaparece la amplitud transversal de la zancada en el plano 2D. <strong>Trabajo futuro:</strong> Registrar 1 toma frontal (0°) en la galería o migrar la rama articular a grafos espacio-temporales 3D (<code>ST-GCN / SkeletonGait++</code>) levantando coordenadas tridimensionales con estimación de profundidad monocular.
               </div>
             </div>
             <div class="p-2.5 rounded-lg bg-[var(--background)] border border-[var(--border)]">
-              <div class="font-semibold">2. Ángulos inéditos extremos (`0°` frontal puro / `180°` espaldas)</div>
+              <div class="font-semibold">2. Oclusiones Dinámicas e Interferencia entre Múltiples Peatones</div>
               <div class="text-[var(--muted-foreground)] mt-0.5">
-                Como la galería actual solo contiene vistas de `90°` y `45°`, al caminar en línea recta hacia la cámara (`0°`) desaparece la amplitud horizontal de la zancada en 2D y el descriptor de esqueleto 2D pierde precisión.
+                El pipeline actual asume un sujeto protagónico despejado. Si una segunda persona se interpone o cruza en segundo plano, la máscara de segmentación y el esqueleto se contaminan. <strong>Trabajo futuro:</strong> Integrar algoritmos de re-identificación de tracklets multiobjeto (<code>ByteTrack / BoT-SORT</code>) para aislar la trayectoria antes del pooling temporal.
               </div>
             </div>
             <div class="p-2.5 rounded-lg bg-[var(--background)] border border-[var(--border)]">
-              <div class="font-semibold">3. Latencia en CPU móvil (~4–6 FPS en APK Offline)</div>
+              <div class="font-semibold">3. Sensibilidad a Secuencias Muy Breves (&lt; 15 cuadros o medio ciclo)</div>
               <div class="text-[var(--muted-foreground)] mt-0.5">
-                Ejecutar `YOLOv8n-seg` + `YOLOv8n-pose` a `512×512` más `GaitBase` 100% offline en CPU de celular procesa ~4–6 cuadros/seg. Para producción continua convendría cuantización INT8 / NNAPI o reemplazar las dos redes YOLO por un solo modelo multi-tarea (seg+pose).
+                El pooling temporal por máximos (TMP) requiere capturar al menos un ciclo completo de zancada (contacto de talón a despegue de punta de ambos pies). En fragmentos ultra-cortos la firma de marcha queda incompleta. <strong>Trabajo futuro:</strong> Reemplazar TMP por transformadores temporales con atención selectiva (<code>Gait Transformer</code>) que modelen la periodicidad del paso de forma adaptativa.
               </div>
             </div>
           </div>
@@ -393,43 +389,9 @@
 
     <!-- TAB 5: SPEAKER GUIDE & Q&A -->
     <div id="tab-qa" class="hidden space-y-4">
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
-        <h3 class="text-sm font-bold">Estructura Recomendada para tu Exposición (5 a 7 minutos)</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)]">
-            <div class="font-mono font-bold text-[var(--primary)]">Min 0:00 – 1:30</div>
-            <div class="font-semibold mt-1">1. El Problema y Dataset Real</div>
-            <p class="text-[var(--muted-foreground)] mt-0.5">
-              Explica que grabaron a 31 personas con 3 cámaras asíncronas (30 fps y 9 fps) en pasillo de 4 m, y que el reto real fue limpiar tiempos muertos y cámaras faltantes sin etiquetar a mano.
-            </p>
-          </div>
-          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)]">
-            <div class="font-mono font-bold text-[var(--primary)]">Min 1:30 – 3:30</div>
-            <div class="font-semibold mt-1">2. Cómo Funciona (Silueta + Esqueleto)</div>
-            <p class="text-[var(--muted-foreground)] mt-0.5">
-              Muestra la vista de 3 paneles: `YOLOv8-seg` genera la silueta `64×44` para `GaitBase` (centrado en 16 franjas + Top-8 simétrico) y `YOLOv8-pose` aporta 99 variables biomecánicas invariantes a la ropa.
-            </p>
-          </div>
-          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)]">
-            <div class="font-mono font-bold text-[var(--primary)]">Min 3:30 – 5:00</div>
-            <div class="font-semibold mt-1">3. Resultados y Matrices</div>
-            <p class="text-[var(--muted-foreground)] mt-0.5">
-              Presenta el 100% en Probes (`201/201`), 100% en `*Prueba` con cambio de ropa (`8/8`), 100% rechazo de desconocidos, y muestra con honestidad la caída a `89.8%` / `55.7%` en Cross-View extremo.
-            </p>
-          </div>
-          <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)]">
-            <div class="font-mono font-bold text-[var(--primary)]">Min 5:00 – 7:00</div>
-            <div class="font-semibold mt-1">4. Limitaciones y Demo en Vivo</div>
-            <p class="text-[var(--muted-foreground)] mt-0.5">
-              Explica el caso de WhatsApp (`JoseLuis`) y el bug del suavizado bilineal en Android. Abre la discusión preguntando a la audiencia qué opinan del balance Silueta vs. Esqueleto.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <!-- Jury Q&A Cards -->
       <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-3">
-        <h3 class="text-sm font-bold">Preguntas Difíciles del Jurado / Audiencia y Cómo Responderlas</h3>
+        <h3 class="text-sm font-bold">Preguntas Clave del Jurado / Audiencia y Cómo Responderlas</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
           <div class="p-3 rounded-lg bg-[var(--background)] border border-[var(--border)] space-y-1">
             <div class="font-bold">❓ "¿Realmente entrenaron una red o solo usaron un modelo preentrenado?"</div>
