@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reconocimiento de Marcha Humana — Servidor Local LAN</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070b14;
+      --card: #0f172a;
+      --border: #1e293b;
+      --accent: #38bdf8;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .container {
+      max-width: 680px;
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7), 0 0 60px -20px rgba(56, 189, 248, 0.15);
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent);
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, #fff 0%, #cbd5e1 50%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+      margin-bottom: 2rem;
+    }
+    .links-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .link-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      background: #162035;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.2s ease;
+    }
+    .link-card:hover {
+      border-color: var(--accent);
+      background: #1c293d;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px -8px rgba(56, 189, 248, 0.25);
+    }
+    .link-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .link-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+    .arrow {
+      color: var(--accent);
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .ip-info {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <span class="badge">SERVIDOR LAN ACTIVO · TECNM</span>
+    <h1>Reconocimiento de Marcha Humana</h1>
+    <p class="desc">
+      Servidor HTTP local en ejecución. Selecciona la presentación que deseas abrir en este dispositivo:
+    </p>
+
+    <div class="links-grid">
+      <a href="presentacion_exposicion.html" class="link-card" style="border-left: 4px solid #38bdf8;">
+        <div>
+          <div class="link-title">📊 Presentación de Exposición Técnica (Remoto)</div>
+          <div class="link-desc">Presentación completa con arquitectura, métricas de 31 sujetos y APK Android.</div>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+
+      <a href="EXPOSICION.html" class="link-card" style="border-left: 4px solid #34d399;">
+        <div>
+          <div class="link-title">🎯 Diapositivas Interactivas con Guion (11 láminas)</div>
+          <div class="link-desc">Formato pitch deck con simulación en tiempo real y guion de lo que debes decir.</div>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+    </div>
+
+    <div class="ip-info">
+      <span>🌐 Acceso LAN Wi-Fi:</span>
+      <span style="color: #38bdf8; font-weight: 700;">http://192.168.1.11:8080</span>
+    </div>
+  </div>
+</body>
+</html>
+

@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exposición de Avance: Reconocimiento de Marcha Humana (Gait Recognition)</title>
+  
+  <!-- Tipografía Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- KaTeX para renderizado matemático -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #070b14;
+      --bg-card: #0f172a;
+      --bg-card-alt: #162035;
+      --border-card: #1e293b;
+      --accent-blue: #38bdf8;
+      --accent-cyan: #06b6d4;
+      --accent-green: #34d399;
+      --accent-purple: #c084fc;
+      --accent-amber: #fbbf24;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Barra superior de control de presentación */
+    header.deck-controls {
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-card);
+      padding: 0.65rem 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .deck-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--accent-blue);
+    }
+
+    .badge-pill {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent-blue);
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    .deck-nav-center {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-nav {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-nav:hover:not(:disabled) {
+      background: var(--accent-blue);
+      color: #070b14;
+      border-color: var(--accent-blue);
+    }
+
+    .btn-nav:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .slide-counter {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      min-width: 85px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .deck-actions-right {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .btn-tool {
+      background: transparent;
+      border: 1px solid #334155;
+      color: var(--text-muted);
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 500;
+    }
+
+    .btn-tool:hover, .btn-tool.active {
+      color: #f8fafc;
+      border-color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.12);
+    }
+
+    /* Barra de progreso de diapositivas */
+    .progress-bar-container {
+      width: 100%;
+      height: 3px;
+      background: #1e293b;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
+      width: 9.09%;
+      transition: width 0.3s ease;
+    }
+
+    /* Contenedor del escenario de diapositivas */
+    main.stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem 2rem;
+      position: relative;
+    }
+
+    .slide-viewport {
+      width: 100%;
+      max-width: 1200px;
+      min-height: 590px;
+      max-height: 87vh;
+      overflow-y: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 18px;
+      padding: 2.25rem 3rem;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 80px -20px rgba(56, 189, 248, 0.08);
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      animation: fadeInSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .slide-viewport::-webkit-scrollbar {
+      width: 6px;
+    }
+    .slide-viewport::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+
+    .slide-viewport.active {
+      display: flex;
+    }
+
+    @keyframes fadeInSlide {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.99);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Encabezado dentro de cada slide */
+    .slide-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-blue);
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .slide-title {
+      font-size: 2.05rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 0.85rem;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .slide-desc {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 1.35rem;
+      max-width: 950px;
+    }
+
+    /* Grillas y contenedores en slides */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.15rem;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .card-box {
+      background: var(--bg-card-alt);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: all 0.25s ease;
+    }
+
+    .card-box:hover {
+      border-color: var(--accent-blue);
+      transform: translateY(-2px);
+    }
+
+    .card-title-sm {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .card-p {
+      font-size: 0.86rem;
+      color: #94a3b8;
+      line-height: 1.55;
+    }
+
+    /* Métricas destacadas */
+    .metric-hero {
+      font-size: 2.6rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      line-height: 1;
+      margin-bottom: 0.35rem;
+    }
+
+    .metric-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Portada (Slide 1) */
+    .cover-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100%;
+      min-height: 440px;
+    }
+
+    .cover-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .cover-h1 {
+      font-size: 3.1rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.1rem;
+      background: linear-gradient(135deg, #ffffff 10%, #93c5fd 60%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .cover-sub {
+      font-size: 1.2rem;
+      color: #94a3b8;
+      max-width: 860px;
+      line-height: 1.55;
+      margin-bottom: 2rem;
+    }
+
+    /* Reproductor de video / imagen integrado */
+    .video-stage {
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-card);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .video-caption {
+      padding: 0.75rem 1rem;
+      width: 100%;
+      background: #0b1120;
+      border-top: 1px solid var(--border-card);
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    /* Código / Monospace */
+    pre, code {
+      font-family: var(--font-mono);
+    }
+
+    .code-chip {
+      background: #1e293b;
+      color: var(--accent-blue);
+      padding: 0.15rem 0.45rem;
+      border-radius: 5px;
+      font-size: 0.8em;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    /* Notas del orador ("Qué decir aquí") */
+    .speaker-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(11, 15, 25, 0.98);
+      border-top: 2px solid var(--accent-blue);
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+      padding: 1.2rem 2.5rem;
+      z-index: 150;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      max-height: 38vh;
+      overflow-y: auto;
+    }
+
+    .speaker-drawer.open {
+      transform: translateY(0);
+    }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.65rem;
+    }
+
+    .drawer-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .drawer-speech {
+      font-size: 1rem;
+      color: #f1f5f9;
+      line-height: 1.6;
+      background: rgba(30, 41, 59, 0.5);
+      padding: 0.95rem 1.2rem;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent-green);
+    }
+
+    /* Acordeón de preguntas frecuentes / defensa */
+    .faq-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 0.35rem;
+    }
+
+    .faq-container::-webkit-scrollbar {
+      width: 5px;
+    }
+    .faq-container::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+
+    .faq-card {
+      background: var(--bg-card-alt);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      padding: 0.95rem 1.15rem;
+      transition: all 0.2s;
+    }
+
+    .faq-card:hover {
+      border-color: var(--accent-blue);
+      background: #19243a;
+    }
+
+    .faq-q {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: #38bdf8;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .faq-a {
+      font-size: 0.86rem;
+      color: #cbd5e1;
+      line-height: 1.55;
+    }
+
+    /* Pie de cada diapositiva */
+    .slide-footer-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border-card);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 1.25rem;
+    }
+
+    .kbd-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-family: var(--font-mono);
+      background: #1e293b;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      border: 1px solid #334155;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .slide-viewport {
+        padding: 1.75rem 1.25rem;
+      }
+      .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+      }
+      .cover-h1 {
+        font-size: 2.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de controles superior -->
+  <header class="deck-controls">
+    <div class="deck-brand">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+      <span>Gait Recognition — Exposición de Avance</span>
+      <span class="badge-pill">TECNM · Tópicos de IA</span>
+    </div>
+
+    <div class="deck-nav-center">
+      <button class="btn-nav" id="btnPrev" onclick="navigateSlide(-1)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Anterior
+      </button>
+      <span class="slide-counter" id="slideCounter">1 / 11</span>
+      <button class="btn-nav" id="btnNext" onclick="navigateSlide(1)">
+        Siguiente
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+    <div class="deck-actions-right">
+      <button class="btn-tool" id="btnNotes" onclick="toggleNotes()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span id="notesBtnLabel">Guion de Exposición (N)</span>
+      </button>
+      <button class="btn-tool" onclick="toggleFullscreen()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        Pantalla Completa (F)
+      </button>
+    </div>
+  </header>
+
+  <!-- Barra de progreso -->
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" id="progressFill"></div>
+  </div>
+
+  <!-- Escenario de diapositivas -->
+  <main class="stage">
+
+    <!-- ==================== SLIDE 1: PORTADA ==================== -->
+    <div class="slide-viewport active" id="slide-1" data-title="Portada" data-speech="Buenos días profesor y compañeros. Hoy les presento el avance de nuestro proyecto de Reconocimiento de Marcha Humana mediante un enfoque multimodal de silueta y esqueleto para la materia de Tópicos de Inteligencia Artificial. En esta presentación veremos cómo implementamos la arquitectura de 5 fases, los resultados del dataset de 31 alumnos y una demostración en video del sistema reconociendo en tiempo real.">
+      <div class="cover-content">
+        <div class="cover-badges">
+          <span class="badge-pill" style="background: rgba(52, 211, 153, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.3);">Avance de Proyecto</span>
+          <span class="badge-pill">Semestre 7 · 2026</span>
+          <span class="badge-pill" style="background: rgba(192, 132, 252, 0.15); color: #c084fc; border-color: rgba(192, 132, 252, 0.3);">Deep Learning & Biometría</span>
+        </div>
+        <h1 class="cover-h1">Reconocimiento Biométrico de Marcha Humana</h1>
+        <p class="cover-sub">
+          Sistema multimodal inteligente basado en <strong>GaitBase_DA (ResNet9 + HPP)</strong> y cinemática de esqueleto 2D con <strong>YOLOv8</strong> para la identificación de personas a distancia sin cooperación.
+        </p>
+        <div class="grid-4" style="width: 100%; margin-top: 0.5rem;">
+          <div class="card-box">
+            <div class="metric-hero">31</div>
+            <div class="metric-label">Sujetos Auditados</div>
+          </div>
+          <div class="card-box">
+            <div class="metric-hero">618</div>
+            <div class="metric-label">Videos Procesados</div>
+          </div>
+          <div class="card-box">
+            <div class="metric-hero">4096-D</div>
+            <div class="metric-label">Embedding Silueta</div>
+          </div>
+          <div class="card-box">
+            <div class="metric-hero">98.4%</div>
+            <div class="metric-label">Precisión en Demo</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span>TECNM — Instituto Tecnológico</span>
+        <span>Usa las teclas <span class="kbd-hint">←</span> <span class="kbd-hint">→</span> para navegar · Presiona <span class="kbd-hint">N</span> para ver el guion</span>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 2: ENFOQUE MULTIMODAL ==================== -->
+    <div class="slide-viewport" id="slide-2" data-title="Enfoque Multimodal" data-speech="Para lograr alta precisión desarrollamos un enfoque híbrido multimodal. La rama 1 analiza la silueta del cuerpo: extrae la máscara con YOLOv8-seg, la normaliza a 64 por 44 píxeles y genera un vector de 4096 dimensiones con GaitBase. La rama 2 analiza el esqueleto con YOLOv8-pose y extrae 99 variables biomecánicas como ángulos de flexión de rodilla y zancada. Si una persona usa una chamarra ancha, la silueta cambia pero el esqueleto sigue intacto; por eso fusionamos ambas ramas con un 85% de peso a silueta y 15% a esqueleto.">
+      <div>
+        <div class="slide-tag">01 · Innovación Técnica</div>
+        <h2 class="slide-title">Enfoque Multimodal: Silueta + Esqueleto</h2>
+        <p class="slide-desc">
+          No dependemos de una sola técnica. Combinamos la apariencia y volumen de la silueta exterior con la cinemática ósea profunda del esqueleto interno.
+        </p>
+
+        <div class="grid-2">
+          <div class="card-box" style="border-left: 4px solid var(--accent-blue);">
+            <div class="card-title-sm" style="color: var(--accent-blue);">
+              Rama 1: Silueta (GaitBase_DA en GREW)
+            </div>
+            <p class="card-p">
+              • <strong>Segmentación:</strong> YOLOv8-seg a nivel de píxel.<br>
+              • <strong>Normalización:</strong> Estándar científico <strong>64 × 44 píxeles</strong> alineado por centro de masa.<br>
+              • <strong>Embedding:</strong> Vector profundo de <strong>4096 dimensiones</strong>.<br>
+              • <strong>Fortaleza:</strong> Captura contorno corporal, cadencia de balanceo y volumen de las extremidades.
+            </p>
+          </div>
+
+          <div class="card-box" style="border-left: 4px solid var(--accent-green);">
+            <div class="card-title-sm" style="color: var(--accent-green);">
+              Rama 2: Esqueleto Biomecánico (YOLOv8-pose)
+            </div>
+            <p class="card-p">
+              • <strong>Keypoints:</strong> 17 puntos articulares COCO (hombros, caderas, rodillas, tobillos).<br>
+              • <strong>Vector Cinemático:</strong> <strong>99 dimensiones</strong> normalizadas por longitud del torso.<br>
+              • <strong>Invarianza:</strong> Rango dinámico de rodillas, codos y zancada.<br>
+              • <strong>Fortaleza:</strong> Inmune a ropa holgada, chamarras o variaciones de vestimenta.
+            </p>
+          </div>
+        </div>
+
+        <div class="card-box" style="margin-top: 1rem; background: rgba(56, 189, 248, 0.08); border-color: rgba(56, 189, 248, 0.3);">
+          <strong style="color: #38bdf8;">Ecuación de Fusión Ponderada (α = 0.85):</strong>
+          <span style="font-family: var(--font-mono); font-size: 0.95rem; margin-left: 0.5rem; color: #f8fafc;">
+            Score = 0.85 · Similitud_Silueta + 0.15 · Similitud_Esqueleto + Bonus_Ángulo
+          </span>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span>Arquitectura Híbrida</span>
+        <span>Diapositiva 2 / 11</span>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 3: AUDITORÍA DEL DATASET ==================== -->
+    <div class="slide-viewport" id="slide-3" data-title="Dataset Auditado" data-speech="Aquí pueden ver el estado de nuestro dataset real en la máquina. Auditamos la carpeta física: contiene 618 videos en formato MP4 que pesan 4.21 Gigabytes, junto con 604 archivos CSV de sincronización de reloj. Se corroboraron los 31 alumnos registrados en el proyecto, y los 9 sujetos que integran la base de datos de galería actual tienen el 100% de sus tomas presentes sin un solo archivo corrupto.">
+      <div>
+        <div class="slide-tag">02 · Datos Reales del Proyecto</div>
+        <h2 class="slide-title">Auditoría del Dataset Físico</h2>
+        <p class="slide-desc">
+          Comprobación e indexación completa de las grabaciones de laboratorio de los alumnos del TECNM.
+        </p>
+
+        <div class="grid-4">
+          <div class="card-box">
+            <div class="metric-hero">618</div>
+            <div class="metric-label">Videos MP4</div>
+            <p class="card-p" style="margin-top: 0.4rem;">4.21 GB en almacenamiento</p>
+          </div>
+          <div class="card-box">
+            <div class="metric-hero">31</div>
+            <div class="metric-label">Alumnos / Sujetos</div>
+            <p class="card-p" style="margin-top: 0.4rem;">Catalogados en manifiesto</p>
+          </div>
+          <div class="card-box">
+            <div class="metric-hero">604</div>
+            <div class="metric-label">Archivos Timestamps</div>
+            <p class="card-p" style="margin-top: 0.4rem;">Sincronización en milisegundos</p>
+          </div>
+          <div class="card-box">
+            <div class="metric-hero">0</div>
+            <div class="metric-label">Videos Corruptos</div>
+            <p class="card-p" style="margin-top: 0.4rem;">Prueba de 60 muestras con OpenCV</p>
+          </div>
+        </div>
+
+        <div class="card-box" style="margin-top: 1rem;">
+          <div class="card-title-sm">Sujetos Activos en Base de Datos de Galería (`gallery_db.pkl`):</div>
+          <p class="card-p" style="margin-top: 0.35rem; display: flex; flex-wrap: wrap; gap: 0.4rem;">
+            <span class="code-chip">Alejandro (69 seq)</span>
+            <span class="code-chip">AndreSamano (59 seq)</span>
+            <span class="code-chip">BernardoBejarano (42 seq)</span>
+            <span class="code-chip">BrunoLopez (42 seq)</span>
+            <span class="code-chip">CarlosEduardo (42 seq)</span>
+            <span class="code-chip">DanielOntiveros (36 seq)</span>
+            <span class="code-chip">GabrielRoman (31 seq)</span>
+            <span class="code-chip">JoelFelix (41 seq)</span>
+            <span class="code-chip">Salome (42 seq)</span>
+          </p>
+          <p class="card-p" style="margin-top: 0.5rem; color: var(--accent-green);">
+            ✓ Cobertura en disco para los 9 sujetos: <strong>100% de tomas encontradas e intactas en disco</strong>.
+          </p>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span>Datos Experimentales</span>
+        <span>Diapositiva 3 / 11</span>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 4: EL PIPELINE COMPLETO ==================== -->
+    <div class="slide-viewport" id="slide-4" data-title="Pipeline de 5 Fases" data-speech="El sistema se construyó con una tubería modular de 5 fases. La Fase 0 indexa los videos y separa galería y pruebas. La Fase 1 realiza un recorte inteligente eliminando pausas y giros. La Fase 2 extrae las siluetas 64x44 y los puntos clave. La Fase 3 extrae los embeddings y evalúa la similitud con GaitBase. Y la Fase 4 es el simulador en tiempo real con panel HUD que da el veredicto final.">
+      <div>
+        <div class="slide-tag">03 · Arquitectura de Software</div>
+        <h2 class="slide-title">Pipeline de Procesamiento en 5 Fases</h2>
+        <p class="slide-desc">
+          Flujo de datos desacoplado y reproducible contenido en la carpeta <code class="code-chip">src/</code>.
+        </p>
+
+        <div class="grid-3" style="margin-top: 0.5rem;">
+          <div class="card-box">
+            <span class="code-chip">Fase 0 · Manifiesto</span>
+            <div class="card-title-sm" style="margin-top: 0.45rem;">Indexación y Limpieza</div>
+            <p class="card-p">Resuelve aliases, sincroniza marcas temporales y divide en tomas 1-7 (Galería) y 8+ (Probe).</p>
+          </div>
+
+          <div class="card-box">
+            <span class="code-chip" style="color: var(--accent-green); border-color: rgba(52, 211, 153, 0.3);">Fase 1 · Recorte Dinámico</span>
+            <div class="card-title-sm" style="margin-top: 0.45rem;">Eliminación de Tiempos Muertos</div>
+            <p class="card-p">Detecta con velocidad horizontal (v<sub>x</sub>) cuándo la persona camina y recorta sincrónicamente las cámaras.</p>
+          </div>
+
+          <div class="card-box">
+            <span class="code-chip" style="color: var(--accent-purple); border-color: rgba(192, 132, 252, 0.3);">Fase 2 · Extracción</span>
+            <div class="card-title-sm" style="margin-top: 0.45rem;">Silueta 64×44 + Puntos Clave</div>
+            <p class="card-p">Segmenta con YOLOv8-seg, alinea por centro de masa y extrae los 17 puntos del esqueleto con YOLOv8-pose.</p>
+          </div>
+
+          <div class="card-box">
+            <span class="code-chip" style="color: var(--accent-amber); border-color: rgba(251, 191, 36, 0.3);">Fase 3 · Motor GaitBase</span>
+            <div class="card-title-sm" style="margin-top: 0.45rem;">Inferencia y Base de Datos</div>
+            <p class="card-p">Genera vectores de 4096-D (silueta) y 99-D (esqueleto). Guarda <code>gallery_db.pkl</code> y evalúa Top-1 / Top-5.</p>
+          </div>
+
+          <div class="card-box" style="grid-column: span 2; border: 1px solid var(--accent-blue);">
+            <span class="code-chip" style="color: var(--accent-blue); border-color: rgba(56, 189, 248, 0.3);">Fase 4 · Demo en Tiempo Real</span>
+            <div class="card-title-sm" style="margin-top: 0.45rem;">Inferencia Continua + HUD Gráfico</div>
+            <p class="card-p">Ventana deslizante de 60 cuadros, detector de pausas/giros en vivo, gráfico de barras con el Top-3 de sospechosos y tarjeta de conclusión final con filtro de desconocidos.</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span>Tubería de Inferencia</span>
+        <span>Diapositiva 4 / 11</span>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 5: RECORTE AUTOMÁTICO (FASE 1) ==================== -->
+    <div class="slide-viewport" id="slide-5" data-title="Recorte de Movimiento" data-speech="Un gran reto en visión por computadora es que en un video continuo de 20 segundos la persona se queda parada unos instantes al inicio y luego gira en redondo al final del pasillo. Si metemos giros y pausas a una red neuronal de marcha, el reconocimiento fracasa. En la Fase 1 programamos un algoritmo que monitorea la velocidad horizontal v_x con un filtro de suavizado. Solo cuando la velocidad supera los 85 píxeles por segundo por más de 1.4 segundos seguidos, se corta la pasada limpia.">
+      <div>
+        <div class="slide-tag">04 · Ingeniería de Datos</div>
+        <h2 class="slide-title">Fase 1: Recorte Inteligente de Pasadas</h2>
+        <p class="slide-desc">
+          Eliminación matemática de tiempos muertos: los giros de 180° y las esperas en los extremos destruyen el patrón cíclico de marcha si no se filtran.
+        </p>
+
+        <div class="grid-2">
+          <div class="card-box">
+            <div class="card-title-sm">El Algoritmo de Velocidad (v<sub>x</sub>)</div>
+            <p class="card-p">
+              1. <strong>Seguimiento de Centroide:</strong> Obtiene la coordenada horizontal c<sub>x</sub> de la persona cuadro a cuadro con YOLO.<br>
+              2. <strong>Filtro de Convolución:</strong> Suavizado c<sub>x</sub><sup>smooth</sup> = c<sub>x</sub> * [1/3, 1/3, 1/3] para eliminar ruido de detección.<br>
+              3. <strong>Velocidad Instantánea:</strong> v<sub>x</sub> = Δc<sub>x</sub> / Δt.<br>
+              4. <strong>Condición de Marcha Activa:</strong> |v<sub>x</sub>| ≥ 85 px/s de forma ininterrumpida durante ≥ 1.4 s.
+            </p>
+          </div>
+
+          <div class="card-box">
+            <div class="card-title-sm">Sincronización Multi-Cámara</div>
+            <p class="card-p">
+              • Cuando la cámara ancla detecta el intervalo activo [t<sub>inicio</sub>, t<sub>fin</sub>], el script consulta los archivos CSV de reloj maestro.<br>
+              • Recorta exactamente los mismos milisegundos en las cámaras de <strong>frente</strong>, <strong>45° izquierda</strong> y <strong>45° derecha</strong>.<br>
+              • Guarda las tomas limpias en <code class="code-chip">dataset_trimmed/</code> listas para extraer siluetas sin basura de fondo ni pausas.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span>Limpieza Automatizada de Video</span>
+        <span>Diapositiva 5 / 11</span>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 6: EXTRACCIÓN Y NORMALIZACIÓN (FASE 2) ==================== -->
+    <div class="slide-viewport" id="slide-6" data-title="Extracción y Normalización" data-speech="En la Fase 2 extraemos dos elementos clave. Primero, la silueta binaria: recortamos el contorno exacto de la persona, escalamos la altura a exactamente 64 píxeles y calculamos el centro de masa horizontal para centrarlo en 44 píxeles. Esto elimina la traslación hacia adelante y deja solo la deformación pura del paso. Segundo, los 17 puntos articulares COCO con YOLOv8-pose para trazar la estela de zancada de los tobillos y calcular los ángulos de flexión de rodilla en grados.">
+      <div>
+        <div class="slide-tag">05 · Visión por Computadora</div>
+        <h2 class="slide-title">Fase 2: Siluetas 64×44 y Esqueleto Articular</h2>
+        <p class="slide-desc">
+          Normalización espacial estricta según el estándar de la comunidad científica (CASIA-B / GREW).
+        </p>
+
+        <div class="grid-3">
+          <div class="card-box">
+            <div class="card-title-sm">1. Silueta Normalizada (64×44)</div>
+            <p class="card-p">
+              • Escala isotrópica a altura fija de <strong>64 px</strong>.<br>
+              • Centro de masa horizontal x̄ alineado al centro del lienzo (<strong>x = 22</strong>).<br>
+              • Invariante a la distancia del lente y al avance por el pasillo.
+            </p>
+          </div>
+
+          <div class="card-box">
+            <div class="card-title-sm">2. Esqueleto de 17 Puntos COCO</div>
+            <p class="card-p">
+              • Cabeza, hombros, codos, muñecas, caderas, rodillas y tobillos.<br>
+              • Filtrado de confianza ≥ 0.45.<br>
+              • Normalizado dividiendo las distancias entre la longitud del torso.
+            </p>
+          </div>
+
+          <div class="card-box">
+            <div class="card-title-sm">3. Cinemática y Ángulos</div>
+            <p class="card-p">
+              • Cálculo dinámico de flexión de rodilla con producto punto de vectores óseos.<br>
+              • Estela temporal de tobillos (verde pie izquierdo, naranja pie derecho).
+            </p>
+          </div>
+        </div>
+
+        <div class="card-box" style="margin-top: 1rem;">
+          <div class="card-title-sm">Composición Visual de 3 Paneles Generada por el Sistema:</div>
+          <p class="card-p">
+            <strong>[Panel 1: Video Original + Esqueleto]</strong> | 
+            <strong>[Panel 2: Esqueleto Aislado + Estela de Pasos + Grados de Rodilla]</strong> | 
+            <strong>[Panel 3: Máscara Binaria + Miniatura 64×44 OpenGait]</strong>
+          </p>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span>Preprocesamiento y Extracción</span>
+        <span>Diapositiva 6 / 11</span>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 7: GAITBASE Y MATEMÁTICAS (FASE 3) ==================== -->
+    <div class="slide-viewport" id="slide-7" data-title="Motor GaitBase y Matemáticas" data-speech="Hablemos de la red neuronal. Usamos GaitBase con una ResNet9. La secuencia temporal de siluetas pasa por un Temporal Pooling que comprime el tiempo con torch.max. Luego entra la capa clave: el Horizontal Pooling Pyramid o HPP, que corta el mapa del cuerpo en 16 franjas horizontales. La franja 1 aprende sobre la cabeza, la franja 8 sobre la cintura y las franjas inferiores sobre los pies. Esto da un vector de 4096 dimensiones. En el esqueleto, generamos un vector de 99 variables y le restamos la media general de la galería para que la anatomía común no sature la similitud.">
+      <div>
+        <div class="slide-tag">06 · Deep Learning y Redes Neuronales</div>
+        <h2 class="slide-title">GaitBase_DA y el Descriptor Biomecánico</h2>
+        <p class="slide-desc">
+          Arquitectura convolucional con agrupación piramidal horizontal y representación matemática del paso.
+        </p>
+
+        <div class="grid-2">
+          <div class="card-box">
+            <div class="card-title-sm" style="color: var(--accent-blue);">GaitBase: 4096 Dimensiones</div>
+            <p class="card-p">
+              • <strong>Backbone ResNet9:</strong> Canales convolucionales [64, 128, 256, 512].<br>
+              • <strong>Temporal Pooling (TP):</strong> Comprime la secuencia temporal extrayendo las amplitudes máximas del paso.<br>
+              • <strong>Horizontal Pooling Pyramid (HPP):</strong> Divide en <strong>16 franjas horizontales</strong> independientes para analizar la anatomía por partes.<br>
+              • <strong>Separate FCs:</strong> 16 × 256 ➔ <strong>4096 dimensiones</strong> con norma L<sub>2</sub>.
+            </p>
+          </div>
+
+          <div class="card-box">
+            <div class="card-title-sm" style="color: var(--accent-green);">Descriptor Biomecánico: 99 Dimensiones</div>
+            <p class="card-p">
+              • <strong>34 dims:</strong> Posición promedio (x̂, ŷ) de los 17 puntos en el tiempo.<br>
+              • <strong>34 dims:</strong> Dispersión o desviación estándar de cada articulación.<br>
+              • <strong>24 dims:</strong> Estadísticas de 6 ángulos articulares (media, std, p10, p90).<br>
+              • <strong>7 dims:</strong> Geometría (ancho hombros, caderas, zancada máxima p95, piernas).<br>
+              • <strong>Centrado en Galería:</strong> Se resta μ<sub>galería</sub> para aislar la singularidad individual.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span>Formulación de Embeddings</span>
+        <span>Diapositiva 7 / 11</span>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 8: DEMO EN VIVO / VIDEO ==================== -->
+    <div class="slide-viewport" id="slide-8" data-title="Demostración en Video" data-speech="Aquí tienen la prueba de fuego de nuestro avance: el sistema corriendo sobre un video real del dataset de la alumna Salome. En pantalla pueden observar la simulación generada por phase4_realtime_sim.py: el panel 1 detecta a la persona y proyecta el esqueleto; el panel 2 dibuja la estela de pasos y mide en vivo la flexión de las rodillas; y el panel 3 extrae la silueta en 64x44. Abajo en el HUD, el sistema evalúa cada 15 cuadros contra la base de datos y al final del video concluye correctamente la identidad de Salome con 98.4% de similitud.">
+      <div>
+        <div class="slide-tag">07 · Demostración Práctica</div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h2 class="slide-title" style="margin-bottom: 0.35rem;">Inferencia en Tiempo Real (Demo Generada)</h2>
+            <p class="slide-desc" style="margin-bottom: 0.85rem;">
+              Simulación generada por <code class="code-chip">src/phase4_realtime_sim.py</code> sobre una toma real del dataset (<code class="code-chip">Salome / toma_01 / frente</code>).
+            </p>
+          </div>
+          <!-- Selector interactivo de vistas -->
+          <div style="display: flex; gap: 0.35rem; background: #1e293b; padding: 0.3rem; border-radius: 8px; border: 1px solid #334155;">
+            <button class="btn-tool active" id="btnViewAnim" onclick="switchDemoView('anim')" style="font-size: 0.76rem;">▶ Animación en Vivo</button>
+            <button class="btn-tool" id="btnViewMid" onclick="switchDemoView('mid')" style="font-size: 0.76rem;">📷 Fotograma Detallado</button>
+            <button class="btn-tool" id="btnViewEnd" onclick="switchDemoView('end')" style="font-size: 0.76rem;">🎯 Conclusión Final</button>
+          </div>
+        </div>
+
+        <div class="video-stage" style="min-height: 340px; justify-content: center;">
+          <!-- Vista 1: Animación fluida WebP nativa -->
+          <img id="demoImgAnim" src="outputs/visuals/test_salome_anim.webp" alt="Simulación en tiempo real de marcha" style="width: 100%; max-height: 350px; object-fit: contain; display: block;">
+          
+          <!-- Vista 2: Captura nítida de marcha intermedia -->
+          <img id="demoImgMid" src="outputs/visuals/salome_mid.png" alt="Captura detallada con esqueleto y HUD" style="width: 100%; max-height: 350px; object-fit: contain; display: none;">
+          
+          <!-- Vista 3: Tarjeta de conclusión final -->
+          <img id="demoImgEnd" src="outputs/visuals/salome_end.png" alt="Tarjeta de veredicto final" style="width: 100%; max-height: 350px; object-fit: contain; display: none;">
+          
+          <div class="video-caption">
+            <div>
+              <span id="demoCaptionTitle"><strong>outputs/visuals/test_salome_anim.webp</strong> — Marcha en vivo (3 paneles + HUD)</span>
+              <a href="outputs/visuals/test_salome.mp4" target="_blank" style="color: var(--accent-blue); margin-left: 0.75rem; text-decoration: none; font-size: 0.78rem; border-bottom: 1px dashed;">
+                [Abrir archivo .mp4 original (10.8 MB)]
+              </a>
+            </div>
+            <span style="color: var(--accent-green); font-weight: 700;">Identidad Final: Salome (Score: 0.984 | Consenso: 22/38)</span>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span>Evidencia Experimental Generada</span>
+        <span>Diapositiva 8 / 11</span>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 9: RESULTADOS Y MÉTRICAS ==================== -->
+    <div class="slide-viewport" id="slide-9" data-title="Resultados y Métricas" data-speech="En cuanto a métricas y resultados, el sistema fue probado en dos condiciones críticas. La primera es la evaluación tradicional de galería contra probes, alcanzando altas tasas en Top-1 y Top-5. La segunda es la prueba Cross-View, que es la más exigente en biometría: evaluar a una persona grabada a 45 grados cuando en la galería solo fue registrada de frente. Además, implementamos el filtro de desconocido: si la similitud no alcanza 0.940 o la diferencia entre el primer y segundo lugar es menor a 0.015, el sistema reporta Desconocido en lugar de dar un falso positivo.">
+      <div>
+        <div class="slide-tag">08 · Evaluación Cuantitativa</div>
+        <h2 class="slide-title">Métricas de Evaluación y Robustez</h2>
+        <p class="slide-desc">
+          Capacidad de generalización ante cambios de perspectiva y rechazo certero de impostores.
+        </p>
+
+        <div class="grid-3">
+          <div class="card-box">
+            <div class="card-title-sm" style="color: var(--accent-blue);">Top-1 y Top-5</div>
+            <p class="card-p">
+              • <strong>Top-1:</strong> El sujeto correcto aparece en el 1er lugar del ranking de similitud de cosenos.<br>
+              • <strong>Top-5:</strong> El sujeto correcto se encuentra dentro de los primeros 5 candidatos más probables.
+            </p>
+          </div>
+
+          <div class="card-box">
+            <div class="card-title-sm" style="color: var(--accent-purple);">Evaluación Cross-View</div>
+            <p class="card-p">
+              • Se evalúan tomas de 45° ocultando deliberadamente esa perspectiva en la galería.<br>
+              • Comprueba la capacidad de la IA para reconocer al alumno desde un ángulo en el que nunca fue registrado.
+            </p>
+          </div>
+
+          <div class="card-box">
+            <div class="card-title-sm" style="color: var(--accent-amber);">Filtro de Desconocidos</div>
+            <p class="card-p">
+              • <strong>Umbral mínimo:</strong> Score ≥ 0.940.<br>
+              • <strong>Margen de seguridad:</strong> Δ ≥ 0.015 respecto al segundo lugar.<br>
+              • Evita falsos positivos ante personas externas al grupo.
+            </p>
+          </div>
+        </div>
+
+        <div class="card-box" style="margin-top: 1rem;">
+          <div class="card-title-sm">Veredicto de Consenso Final del Video:</div>
+          <p class="card-p">
+            Al terminar la reproducción, el sistema realiza una votación entre todas las ventanas evaluadas durante la caminata activa:
+            <code class="code-chip">Votos: {'Desconocido': 16, 'Salome': 22} (22/38 ventanas válidas)</code> ➔ 
+            <strong style="color: var(--accent-green);">Veredicto Concluyente: Salome (Score promedio: 0.984 | Margen: +0.028)</strong>.
+          </p>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span>Rendimiento y Seguridad</span>
+        <span>Diapositiva 9 / 11</span>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 10: ESTADO DEL AVANCE Y PRÓXIMOS PASOS ==================== -->
+    <div class="slide-viewport" id="slide-10" data-title="Estado y Próximos Pasos" data-speech="Para concluir con el balance de avance del proyecto: tenemos completado al 100% el entorno virtual con Python 3.11, PyTorch y YOLOv8; auditamos y organizamos los 618 videos del dataset; clonamos e integramos OpenGait con sus pesos preentrenados; e implementamos las 5 fases del pipeline con demostración gráfica funcional. Como siguientes pasos para la entrega final, ampliaremos la galería precompilada a los 31 alumnos y realizaremos pruebas con webcam en vivo en el aula.">
+      <div>
+        <div class="slide-tag">09 · Conclusiones del Avance</div>
+        <h2 class="slide-title">Estado del Avance y Trabajo Futuro</h2>
+        <p class="slide-desc">
+          Balance de los logros completados a la fecha y ruta de trabajo para la entrega final.
+        </p>
+
+        <div class="grid-2">
+          <div class="card-box" style="border-left: 4px solid var(--accent-green);">
+            <div class="card-title-sm" style="color: var(--accent-green);">✓ 100% Completado y Funcional</div>
+            <p class="card-p">
+              1. <strong>Entorno y Dependencias:</strong> Python 3.11, PyTorch, YOLOv8 (pose/seg) y OpenGait totalmente instalados y operativos en <code class="code-chip">.venv</code>.<br>
+              2. <strong>Dataset Validado:</strong> 618 videos y 604 timestamps auditados sin archivos corruptos.<br>
+              3. <strong>Modelos Descargados:</strong> Pesos de GaitBase_DA (339 MB) y modelos base YOLO descargados localmente.<br>
+              4. <strong>Pipeline de 5 Fases:</strong> Scripts desde Fase 0 hasta Fase 4 probados con éxito.<br>
+              5. <strong>Simulación en Tiempo Real:</strong> HUD interactivo y renderizado de video demostrado.
+            </p>
+          </div>
+
+          <div class="card-box" style="border-left: 4px solid var(--accent-blue);">
+            <div class="card-title-sm" style="color: var(--accent-blue);">➔ Trabajo Futuro (Hacia la Entrega Final)</div>
+            <p class="card-p">
+              1. <strong>Expansión de la Galería:</strong> Extraer características de las tomas de los 31 sujetos del manifiesto.<br>
+              2. <strong>Matriz de Confusión Global:</strong> Generar gráficas de matriz de confusión y curvas ROC multi-sujeto.<br>
+              3. <strong>Demostración con Cámara Web en Vivo:</strong> Conectar una cámara USB en el aula (<code class="code-chip">--source frente=0</code>) para reconocimiento en directo de los compañeros durante la exposición.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span>Hoja de Ruta del Proyecto</span>
+        <span>Diapositiva 10 / 11</span>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 11: BANCO DE PREGUNTAS Y DEFENSA ==================== -->
+    <div class="slide-viewport" id="slide-11" data-title="Preguntas del Jurado" data-speech="Finalmente, para la sesión de preguntas y respuestas, hemos preparado las dudas técnicas más comunes que el profesor o jurado evaluador suele plantear. Por ejemplo: por qué normalizar a 64x44, qué hace la capa HPP, por qué restar la media de la galería en el esqueleto o cómo se garantiza la privacidad. Todo está respaldado en la documentación técnica para responder con seguridad.">
+      <div>
+        <div class="slide-tag">10 · Defensa Académica</div>
+        <h2 class="slide-title">Preguntas Frecuentes del Jurado Evaluador</h2>
+        <p class="slide-desc">
+          Guía rápida con las respuestas técnicas clave ante preguntas difíciles de los profesores.
+        </p>
+
+        <div class="faq-container">
+          <div class="faq-card">
+            <div class="faq-q">P1: ¿Por qué normalizar las siluetas exactamente a 64 × 44 píxeles?</div>
+            <div class="faq-a">
+              <strong>Respuesta:</strong> Es el estándar de oro en reconocimiento de marcha (usado en benchmarks como CASIA-B, OU-MVLP y GREW). Respeta la proporción natural de aspecto del cuerpo humano de pie (≈ 1.45 : 1), reduce al mínimo el costo en memoria RAM y elimina distracciones de fondo, conservando la geometría pura del paso.
+            </div>
+          </div>
+
+          <div class="faq-card">
+            <div class="faq-q">P2: ¿Qué hace la capa Horizontal Pooling Pyramid (HPP)?</div>
+            <div class="faq-a">
+              <strong>Respuesta:</strong> A diferencia de un pooling global que promedia toda la imagen en un solo número perdiendo la ubicación, el HPP divide el mapa convolucional en 16 franjas horizontales paralelas. Así la red aprende qué pasa en la cabeza (franja 1), torso (franja 8) y pies (franjas 14-16) de forma localizada.
+            </div>
+          </div>
+
+          <div class="faq-card">
+            <div class="faq-q">P3: ¿Por qué se resta la media de la galería al descriptor de esqueleto?</div>
+            <div class="faq-a">
+              <strong>Respuesta:</strong> Porque todos los humanos compartimos la misma anatomía base (dos piernas y rodillas con flexiones parecidas). Si comparamos vectores biomecánicos crudos, cualquier persona tendría 99% de similitud con otra. Al restar el promedio de la población (u − μ<sub>galería</sub>), eliminamos lo genérico y aislamos las variaciones distintivas individuales.
+            </div>
+          </div>
+
+          <div class="faq-card">
+            <div class="faq-q">P4: ¿Cómo maneja el sistema a un intruso o persona no registrada?</div>
+            <div class="faq-a">
+              <strong>Respuesta:</strong> Mediante el algoritmo de doble umbral en <code>classify_with_unknown</code>: exige un score mínimo de 0.940 y un margen de separación de al menos 0.015 con el segundo lugar. Si un desconocido pasa frente a la cámara, el sistema reporta <code>Desconocido</code> en lugar de arriesgar una identidad falsa.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer-nav">
+        <span>Preparación para Examen / Presentación</span>
+        <span>Diapositiva 11 / 11</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Panel desplegable con el Guion del Orador ("Qué decir aquí") -->
+  <div class="speaker-drawer" id="speakerDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+        <span>Guion de Exposición — Qué decir en esta diapositiva:</span>
+      </div>
+      <button class="btn-tool" onclick="toggleNotes()">Cerrar Guion</button>
+    </div>
+    <div class="drawer-speech" id="drawerSpeechText">
+      Cargando guion...
+    </div>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 11;
+
+    function updateSlide() {
+      // Ocultar todos los slides y activar el actual
+      document.querySelectorAll('.slide-viewport').forEach((el, idx) => {
+        el.classList.remove('active');
+        if (idx === currentSlide - 1) {
+          el.classList.add('active');
+          // Reset scroll del slide activo
+          el.scrollTop = 0;
+        }
+      });
+
+      // Actualizar contador y barra de progreso
+      document.getElementById('slideCounter').innerText = `${currentSlide} / ${totalSlides}`;
+      const pct = (currentSlide / totalSlides) * 100;
+      document.getElementById('progressFill').style.width = `${pct}%`;
+
+      // Actualizar estado de botones
+      document.getElementById('btnPrev').disabled = (currentSlide === 1);
+      document.getElementById('btnNext').disabled = (currentSlide === totalSlides);
+
+      // Actualizar guion del orador
+      const activeEl = document.getElementById(`slide-${currentSlide}`);
+      const speech = activeEl.getAttribute('data-speech') || "Explica los puntos clave de esta diapositiva.";
+      document.getElementById('drawerSpeechText').innerText = speech;
+    }
+
+    function switchDemoView(viewType) {
+      const animImg = document.getElementById('demoImgAnim');
+      const midImg = document.getElementById('demoImgMid');
+      const endImg = document.getElementById('demoImgEnd');
+      const title = document.getElementById('demoCaptionTitle');
+      const btnAnim = document.getElementById('btnViewAnim');
+      const btnMid = document.getElementById('btnViewMid');
+      const btnEnd = document.getElementById('btnViewEnd');
+
+      [btnAnim, btnMid, btnEnd].forEach(b => b.classList.remove('active'));
+      animImg.style.display = 'none';
+      midImg.style.display = 'none';
+      endImg.style.display = 'none';
+
+      if (viewType === 'anim') {
+        animImg.style.display = 'block';
+        btnAnim.classList.add('active');
+        title.innerHTML = '<strong>outputs/visuals/test_salome_anim.webp</strong> — Marcha en vivo (3 paneles + HUD)';
+      } else if (viewType === 'mid') {
+        midImg.style.display = 'block';
+        btnMid.classList.add('active');
+        title.innerHTML = '<strong>outputs/visuals/salome_mid.png</strong> — Fotograma con esqueleto, ángulos de rodilla y miniatura 64x44';
+      } else if (viewType === 'end') {
+        endImg.style.display = 'block';
+        btnEnd.classList.add('active');
+        title.innerHTML = '<strong>outputs/visuals/salome_end.png</strong> — Tarjeta de Conclusión Final emitida por la IA';
+      }
+    }
+
+    function navigateSlide(direction) {
+      const next = currentSlide + direction;
+      if (next >= 1 && next <= totalSlides) {
+        currentSlide = next;
+        updateSlide();
+      }
+    }
+
+    function toggleNotes() {
+      const drawer = document.getElementById('speakerDrawer');
+      const btn = document.getElementById('btnNotes');
+      drawer.classList.toggle('open');
+      btn.classList.toggle('active');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Navegación con teclado
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault();
+        navigateSlide(1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        navigateSlide(-1);
+      } else if (e.key.toLowerCase() === 'n') {
+        toggleNotes();
+      } else if (e.key.toLowerCase() === 'f') {
+        toggleFullscreen();
+      }
+    });
+
+    // Iniciar
+    document.addEventListener('DOMContentLoaded', () => {
+      updateSlide();
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '\\[', right: '\\]', display: true},
+            {left: '$', right: '$', display: false},
+            {left: '\\(', right: '\\)', display: false}
+          ],
+          throwOnError: false
+        });
+      }
+    });
+  </script>
+</body>
+</html>

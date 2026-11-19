@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="#0D1117">
 
+    <!-- Vista previa de la cámara en vivo -->
     <androidx.camera.view.PreviewView
         android:id="@+id/previewView"
         android:layout_width="0dp"
@@ -16,6 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Capa de dibujo de esqueleto, siluetas y reproducción de video -->
     <ImageView
         android:id="@+id/overlayView"
         android:layout_width="0dp"
@@ -26,10 +28,27 @@
         app:layout_constraintStart_toStartOf="@id/previewView"
         app:layout_constraintEnd_toEndOf="@id/previewView" />
 
+    <!-- Badge indicador de modo actual -->
+    <TextView
+        android:id="@+id/modeBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:background="#CC161B22"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="4dp"
+        android:text="● MODO CÁMARA EN VIVO"
+        android:textColor="#58A6FF"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Miniatura de silueta normalizada OpenGait 64x44 -->
     <ImageView
         android:id="@+id/silhouettePreview"
-        android:layout_width="88dp"
-        android:layout_height="128dp"
+        android:layout_width="72dp"
+        android:layout_height="105dp"
         android:layout_margin="12dp"
         android:background="#CC000000"
         android:padding="2dp"
@@ -37,6 +56,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Panel de control inferior -->
     <LinearLayout
         android:id="@+id/bottomPanel"
         android:layout_width="0dp"
@@ -47,6 +67,35 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Barra de progreso para análisis de video -->
+        <LinearLayout
+            android:id="@+id/videoProgressLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/videoProgressText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Analizando video: 0%"
+                android:textColor="#58A6FF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <ProgressBar
+                android:id="@+id/videoProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:layout_marginTop="4dp"
+                android:max="100"
+                android:progress="0"
+                android:progressTint="#58A6FF" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/statusText"
@@ -66,6 +115,7 @@
             android:textColor="#C9D1D9"
             android:textSize="13sp" />
 
+        <!-- Botonera de acciones -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -94,8 +144,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Video .mp4" />
+                android:text="Importar Video" />
         </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
-
