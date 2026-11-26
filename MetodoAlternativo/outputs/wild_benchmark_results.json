@@ -1,0 +1,220 @@
+{
+  "gaitbase_p1": {
+    "correct": 2,
+    "total": 5,
+    "videos": {
+      "AlejandroNoControlado.mp4": {
+        "gt": "Alejandro",
+        "pred": "AndreSamano",
+        "ok": false,
+        "windows": 52,
+        "gt_votes": 0,
+        "top3_votes": [
+          [
+            "AndreSamano",
+            41
+          ],
+          [
+            "LannaMeza",
+            5
+          ],
+          [
+            "JeylenGarcia",
+            3
+          ]
+        ]
+      },
+      "BernardoBejaranoNocontrolado.mp4": {
+        "gt": "BernardoBejarano",
+        "pred": "CarlosEduardo",
+        "ok": false,
+        "windows": 26,
+        "gt_votes": 1,
+        "top3_votes": [
+          [
+            "CarlosEduardo",
+            8
+          ],
+          [
+            "MarcoVinicio",
+            6
+          ],
+          [
+            "GabrielRoman",
+            5
+          ]
+        ]
+      },
+      "GabrielRoman(Video escena no controlada).mp4": {
+        "gt": "GabrielRoman",
+        "pred": "GabrielRoman",
+        "ok": true,
+        "windows": 10,
+        "gt_votes": 7,
+        "top3_votes": [
+          [
+            "GabrielRoman",
+            7
+          ],
+          [
+            "AndreSamano",
+            1
+          ],
+          [
+            "EdgarAbraham",
+            1
+          ]
+        ]
+      },
+      "GabrielRomanNoControlado2.mp4": {
+        "gt": "GabrielRoman",
+        "pred": "GabrielRoman",
+        "ok": true,
+        "windows": 22,
+        "gt_votes": 9,
+        "top3_votes": [
+          [
+            "GabrielRoman",
+            9
+          ],
+          [
+            "JavierCruz",
+            7
+          ],
+          [
+            "EdgarAbraham",
+            3
+          ]
+        ]
+      },
+      "JoseLuisNocontrolado.mp4": {
+        "gt": "JoseLuis",
+        "pred": "BernardoBejarano",
+        "ok": false,
+        "windows": 48,
+        "gt_votes": 14,
+        "top3_votes": [
+          [
+            "BernardoBejarano",
+            23
+          ],
+          [
+            "JoseLuis",
+            14
+          ],
+          [
+            "JeylenGarcia",
+            11
+          ]
+        ]
+      }
+    }
+  },
+  "deepgaitv2": {
+    "correct": 1,
+    "total": 5,
+    "videos": {
+      "AlejandroNoControlado.mp4": {
+        "gt": "Alejandro",
+        "pred": "AndreSamano",
+        "ok": false,
+        "windows": 52,
+        "gt_votes": 5,
+        "top3_votes": [
+          [
+            "AndreSamano",
+            26
+          ],
+          [
+            "BernardoBejarano",
+            20
+          ],
+          [
+            "Alejandro",
+            5
+          ]
+        ]
+      },
+      "BernardoBejaranoNocontrolado.mp4": {
+        "gt": "BernardoBejarano",
+        "pred": "EdgarAbraham",
+        "ok": false,
+        "windows": 26,
+        "gt_votes": 0,
+        "top3_votes": [
+          [
+            "EdgarAbraham",
+            12
+          ],
+          [
+            "MarcoVinicio",
+            12
+          ],
+          [
+            "JuanPablo",
+            2
+          ]
+        ]
+      },
+      "GabrielRoman(Video escena no controlada).mp4": {
+        "gt": "GabrielRoman",
+        "pred": "EdgarAbraham",
+        "ok": false,
+        "windows": 10,
+        "gt_votes": 3,
+        "top3_votes": [
+          [
+            "EdgarAbraham",
+            5
+          ],
+          [
+            "GabrielRoman",
+            3
+          ],
+          [
+            "Alejandro",
+            1
+          ]
+        ]
+      },
+      "GabrielRomanNoControlado2.mp4": {
+        "gt": "GabrielRoman",
+        "pred": "GabrielRoman",
+        "ok": true,
+        "windows": 22,
+        "gt_votes": 10,
+        "top3_votes": [
+          [
+            "GabrielRoman",
+            10
+          ],
+          [
+            "EdgarAbraham",
+            7
+          ],
+          [
+            "JavierCruz",
+            4
+          ]
+        ]
+      },
+      "JoseLuisNocontrolado.mp4": {
+        "gt": "JoseLuis",
+        "pred": "BernardoBejarano",
+        "ok": false,
+        "windows": 48,
+        "gt_votes": 0,
+        "top3_votes": [
+          [
+            "BernardoBejarano",
+            39
+          ],
+          [
+            "JeylenGarcia",
+            9
+          ]
+        ]
+      }
+    }
+  }
+}

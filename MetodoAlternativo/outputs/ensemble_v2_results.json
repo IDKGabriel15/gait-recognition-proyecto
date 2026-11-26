@@ -1,0 +1,14 @@
+{
+  "all_available": 100.0,
+  "only_frente": 100.0,
+  "only_45_izq": 100.0,
+  "only_45_der": 100.0,
+  "cross_frente": 91.5,
+  "cross_45_izq": 98.0,
+  "cross_45_der": 98.9,
+  "ext_3cam": "5/8",
+  "ext_1cam": "4/8",
+  "openset_auc": 0.9933,
+  "openset_eer": 4.17,
+  "openset_tar_far1": 90.1
+}

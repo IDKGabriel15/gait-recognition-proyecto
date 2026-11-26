@@ -16,6 +16,10 @@ third_party/
 *.pt
 *.onnx
 !android_app/app/src/main/assets/*.onnx
+!MetodoAlternativo/android_app_v2/app/src/main/assets/*.onnx
+MetodoAlternativo/weights/
+MetodoAlternativo/outputs/*.pkl
+MetodoAlternativo/outputs/onnx/
 
 # Salidas pesadas regenerables
 outputs/features/

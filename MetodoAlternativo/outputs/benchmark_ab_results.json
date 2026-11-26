@@ -1,0 +1,356 @@
+{
+  "P1: GaitBase (Top8, sin TTA)": {
+    "scenarios": {
+      "all_available": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 199,
+        "total": 199
+      },
+      "only_frente": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 199,
+        "total": 199
+      },
+      "only_45_izq": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 197,
+        "total": 197
+      },
+      "only_45_der": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 177,
+        "total": 177
+      },
+      "cross_frente": {
+        "top1": 66.83417085427136,
+        "top5": 95.97989949748744,
+        "correct1": 133,
+        "total": 199
+      },
+      "cross_45_izq": {
+        "top1": 93.4010152284264,
+        "top5": 99.49238578680203,
+        "correct1": 184,
+        "total": 197
+      },
+      "cross_45_der": {
+        "top1": 91.52542372881356,
+        "top5": 100.0,
+        "correct1": 162,
+        "total": 177
+      }
+    },
+    "ext_3cam": [
+      4,
+      8
+    ],
+    "ext_1cam": [
+      3,
+      8
+    ],
+    "openset_auc": 0.9689084548563343,
+    "openset_eer": 10.400534570181987,
+    "openset_tar_far1": 72.2672064777328,
+    "avg_match_ms": 1.6599000082351267,
+    "avg_inf_ms_30f": 204.5746764879903
+  },
+  "P1+: GaitBase + MatcherV2 (TTA+ASNorm)": {
+    "scenarios": {
+      "all_available": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 199,
+        "total": 199
+      },
+      "only_frente": {
+        "top1": 98.49246231155779,
+        "top5": 100.0,
+        "correct1": 196,
+        "total": 199
+      },
+      "only_45_izq": {
+        "top1": 99.49238578680203,
+        "top5": 100.0,
+        "correct1": 196,
+        "total": 197
+      },
+      "only_45_der": {
+        "top1": 99.43502824858757,
+        "top5": 100.0,
+        "correct1": 176,
+        "total": 177
+      },
+      "cross_frente": {
+        "top1": 68.34170854271356,
+        "top5": 94.9748743718593,
+        "correct1": 136,
+        "total": 199
+      },
+      "cross_45_izq": {
+        "top1": 91.37055837563452,
+        "top5": 100.0,
+        "correct1": 180,
+        "total": 197
+      },
+      "cross_45_der": {
+        "top1": 88.13559322033899,
+        "top5": 100.0,
+        "correct1": 156,
+        "total": 177
+      }
+    },
+    "ext_3cam": [
+      4,
+      8
+    ],
+    "ext_1cam": [
+      4,
+      8
+    ],
+    "openset_auc": 0.9003576903423608,
+    "openset_eer": 19.547187610549898,
+    "openset_tar_far1": 45.34412955465587,
+    "avg_match_ms": 3.0737000051885843,
+    "avg_inf_ms_30f": 204.5746764879903
+  },
+  "P2A: DeepGaitV2-P3D (Base)": {
+    "scenarios": {
+      "all_available": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 199,
+        "total": 199
+      },
+      "only_frente": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 199,
+        "total": 199
+      },
+      "only_45_izq": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 197,
+        "total": 197
+      },
+      "only_45_der": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 177,
+        "total": 177
+      },
+      "cross_frente": {
+        "top1": 78.39195979899498,
+        "top5": 98.99497487437186,
+        "correct1": 156,
+        "total": 199
+      },
+      "cross_45_izq": {
+        "top1": 97.46192893401015,
+        "top5": 98.98477157360406,
+        "correct1": 192,
+        "total": 197
+      },
+      "cross_45_der": {
+        "top1": 97.74011299435028,
+        "top5": 100.0,
+        "correct1": 173,
+        "total": 177
+      }
+    },
+    "ext_3cam": [
+      1,
+      8
+    ],
+    "ext_1cam": [
+      0,
+      8
+    ],
+    "openset_auc": 0.9860854526158563,
+    "openset_eer": 6.839353798985888,
+    "openset_tar_far1": 78.34008097165992,
+    "avg_match_ms": 1.5951000095810741,
+    "avg_inf_ms_30f": 316.3093124931038
+  },
+  "P2A+: DeepGaitV2-P3D (TTA+ASNorm)": {
+    "scenarios": {
+      "all_available": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 199,
+        "total": 199
+      },
+      "only_frente": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 199,
+        "total": 199
+      },
+      "only_45_izq": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 197,
+        "total": 197
+      },
+      "only_45_der": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 177,
+        "total": 177
+      },
+      "cross_frente": {
+        "top1": 81.4070351758794,
+        "top5": 100.0,
+        "correct1": 162,
+        "total": 199
+      },
+      "cross_45_izq": {
+        "top1": 94.9238578680203,
+        "top5": 99.49238578680203,
+        "correct1": 187,
+        "total": 197
+      },
+      "cross_45_der": {
+        "top1": 96.61016949152543,
+        "top5": 100.0,
+        "correct1": 171,
+        "total": 177
+      }
+    },
+    "ext_3cam": [
+      1,
+      8
+    ],
+    "ext_1cam": [
+      0,
+      8
+    ],
+    "openset_auc": 0.9664714437325577,
+    "openset_eer": 10.602963719979561,
+    "openset_tar_far1": 53.036437246963565,
+    "avg_match_ms": 3.08470000163652,
+    "avg_inf_ms_30f": 316.3093124931038
+  },
+  "P2A++: DeepGaitV2-P3D (TTA+ASNorm+PCA)": {
+    "scenarios": {
+      "all_available": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 199,
+        "total": 199
+      },
+      "only_frente": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 199,
+        "total": 199
+      },
+      "only_45_izq": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 197,
+        "total": 197
+      },
+      "only_45_der": {
+        "top1": 100.0,
+        "top5": 100.0,
+        "correct1": 177,
+        "total": 177
+      },
+      "cross_frente": {
+        "top1": 87.93969849246231,
+        "top5": 99.49748743718592,
+        "correct1": 175,
+        "total": 199
+      },
+      "cross_45_izq": {
+        "top1": 94.9238578680203,
+        "top5": 100.0,
+        "correct1": 187,
+        "total": 197
+      },
+      "cross_45_der": {
+        "top1": 97.74011299435028,
+        "top5": 100.0,
+        "correct1": 173,
+        "total": 177
+      }
+    },
+    "ext_3cam": [
+      1,
+      8
+    ],
+    "ext_1cam": [
+      0,
+      8
+    ],
+    "openset_auc": 0.9755119688691483,
+    "openset_eer": 7.527219841987344,
+    "openset_tar_far1": 64.5748987854251,
+    "avg_match_ms": 3.864600002998486,
+    "avg_inf_ms_30f": 316.3093124931038
+  },
+  "P2B: SkeletonGait-P3D (Solo Esqueleto)": {
+    "scenarios": {
+      "all_available": {
+        "top1": 28.64321608040201,
+        "top5": 81.4070351758794,
+        "correct1": 57,
+        "total": 199
+      },
+      "only_frente": {
+        "top1": 30.150753768844222,
+        "top5": 76.38190954773869,
+        "correct1": 60,
+        "total": 199
+      },
+      "only_45_izq": {
+        "top1": 20.81218274111675,
+        "top5": 71.57360406091371,
+        "correct1": 41,
+        "total": 197
+      },
+      "only_45_der": {
+        "top1": 18.07909604519774,
+        "top5": 76.8361581920904,
+        "correct1": 32,
+        "total": 177
+      },
+      "cross_frente": {
+        "top1": 8.040201005025125,
+        "top5": 22.110552763819097,
+        "correct1": 16,
+        "total": 199
+      },
+      "cross_45_izq": {
+        "top1": 3.045685279187817,
+        "top5": 31.472081218274113,
+        "correct1": 6,
+        "total": 197
+      },
+      "cross_45_der": {
+        "top1": 6.214689265536723,
+        "top5": 37.85310734463277,
+        "correct1": 11,
+        "total": 177
+      }
+    },
+    "ext_3cam": [
+      0,
+      8
+    ],
+    "ext_1cam": [
+      0,
+      8
+    ],
+    "openset_auc": 0.5784167289021658,
+    "openset_eer": 45.487598757910455,
+    "openset_tar_far1": 8.097165991902834,
+    "avg_match_ms": 3.0470999772660434,
+    "avg_inf_ms_30f": 359.9888750068203
+  }
+}
