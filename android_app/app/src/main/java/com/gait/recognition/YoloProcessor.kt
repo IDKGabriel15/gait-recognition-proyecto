@@ -338,27 +338,107 @@ class YoloProcessor(context: Context, private val env: OrtEnvironment) {
                 Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
             }
             val canvas = Canvas(bmp)
-            val boxPaint = Paint().apply {
-                this.color = color
-                style = Paint.Style.STROKE
-                strokeWidth = 5f
-            }
-            val textPaint = Paint().apply {
-                this.color = color
-                textSize = 42f
-                isFakeBoldText = true
-            }
+
             if (box != null) {
                 val r = RectF(box.left * width, box.top * height, box.right * width, box.bottom * height)
-                canvas.drawRect(r, boxPaint)
-                canvas.drawText(label, r.left, max(46f, r.top - 12f), textPaint)
+                
+                // 1. Marco sutil con transparencia
+                val subtleBoxPaint = Paint().apply {
+                    this.color = color
+                    alpha = 60
+                    style = Paint.Style.STROKE
+                    strokeWidth = 2f
+                    isAntiAlias = true
+                }
+                canvas.drawRoundRect(r, 12f, 12f, subtleBoxPaint)
+
+                // 2. Retículas biométricas en las 4 esquinas (HUD corners)
+                val cornerPaint = Paint().apply {
+                    this.color = color
+                    style = Paint.Style.STROKE
+                    strokeWidth = 8f
+                    strokeCap = Paint.Cap.ROUND
+                    isAntiAlias = true
+                }
+                val cLen = min(r.width() * 0.20f, r.height() * 0.15f).coerceIn(20f, 60f)
+                
+                // Esquina superior izquierda
+                canvas.drawLine(r.left, r.top + cLen, r.left, r.top, cornerPaint)
+                canvas.drawLine(r.left, r.top, r.left + cLen, r.top, cornerPaint)
+                // Esquina superior derecha
+                canvas.drawLine(r.right - cLen, r.top, r.right, r.top, cornerPaint)
+                canvas.drawLine(r.right, r.top, r.right, r.top + cLen, cornerPaint)
+                // Esquina inferior izquierda
+                canvas.drawLine(r.left, r.bottom - cLen, r.left, r.bottom, cornerPaint)
+                canvas.drawLine(r.left, r.bottom, r.left + cLen, r.bottom, cornerPaint)
+                // Esquina inferior derecha
+                canvas.drawLine(r.right - cLen, r.bottom, r.right, r.bottom, cornerPaint)
+                canvas.drawLine(r.right, r.bottom, r.right, r.bottom - cLen, cornerPaint)
+
+                // 3. Etiqueta flotante estilo "Badge Glassmorphism"
+                val textPaint = Paint().apply {
+                    this.color = Color.WHITE
+                    textSize = 34f
+                    isFakeBoldText = true
+                    isAntiAlias = true
+                }
+                val textWidth = textPaint.measureText(label)
+                val badgePadX = 22f
+                val badgePadY = 14f
+                val badgeHeight = 52f
+                val badgeTop = max(16f, r.top - badgeHeight - 12f)
+                val badgeBottom = badgeTop + badgeHeight
+                val badgeRect = RectF(r.left, badgeTop, r.left + textWidth + (badgePadX * 2) + 24f, badgeBottom)
+
+                val badgeBgPaint = Paint().apply {
+                    this.color = Color.argb(225, 10, 16, 30)
+                    style = Paint.Style.FILL
+                    isAntiAlias = true
+                }
+                val badgeBorderPaint = Paint().apply {
+                    this.color = color
+                    style = Paint.Style.STROKE
+                    strokeWidth = 3f
+                    isAntiAlias = true
+                }
+                canvas.drawRoundRect(badgeRect, 12f, 12f, badgeBgPaint)
+                canvas.drawRoundRect(badgeRect, 12f, 12f, badgeBorderPaint)
+
+                // Punto indicador de estado dentro del badge
+                val dotPaint = Paint().apply {
+                    this.color = color
+                    style = Paint.Style.FILL
+                    isAntiAlias = true
+                }
+                val dotX = r.left + badgePadX
+                val dotY = badgeTop + (badgeHeight / 2f)
+                canvas.drawCircle(dotX, dotY, 7f, dotPaint)
+
+                // Texto del sujeto
+                canvas.drawText(label, dotX + 18f, dotY + 12f, textPaint)
             }
+
+            // 4. Esqueleto cinemático con trazo suave anti-aliased
             if (kpts != null) {
-                val linePaint = Paint().apply { strokeWidth = 6f; isAntiAlias = true }
-                val ptPaint = Paint().apply { style = Paint.Style.FILL; isAntiAlias = true }
+                val linePaint = Paint().apply {
+                    strokeWidth = 7f
+                    strokeCap = Paint.Cap.ROUND
+                    isAntiAlias = true
+                }
+                val jointGlowPaint = Paint().apply {
+                    style = Paint.Style.FILL
+                    alpha = 100
+                    isAntiAlias = true
+                }
+                val jointCorePaint = Paint().apply {
+                    style = Paint.Style.FILL
+                    isAntiAlias = true
+                }
+
                 for ((i, j) in COCO_SKELETON) {
                     if (kpts[i][2] >= 0.45f && kpts[j][2] >= 0.45f) {
-                        linePaint.color = if (i % 2 == 1 && j % 2 == 1) Color.rgb(80, 230, 120) else Color.rgb(40, 165, 255)
+                        // Extremidades izquierdas verdes / derechas azules
+                        linePaint.color = if (i % 2 == 1 && j % 2 == 1) Color.rgb(52, 211, 153) else Color.rgb(56, 189, 248)
                         canvas.drawLine(
                             kpts[i][0] * width, kpts[i][1] * height,
                             kpts[j][0] * width, kpts[j][1] * height, linePaint
@@ -367,8 +447,16 @@ class YoloProcessor(context: Context, private val env: OrtEnvironment) {
                 }
                 for (k in 0 until 17) {
                     if (kpts[k][2] >= 0.45f) {
-                        ptPaint.color = if (k % 2 == 1) Color.GREEN else Color.YELLOW
-                        canvas.drawCircle(kpts[k][0] * width, kpts[k][1] * height, 8f, ptPaint)
+                        val kx = kpts[k][0] * width
+                        val ky = kpts[k][1] * height
+                        val jColor = if (k % 2 == 1) Color.rgb(52, 211, 153) else Color.rgb(56, 189, 248)
+                        
+                        // Halo exterior
+                        jointGlowPaint.color = jColor
+                        canvas.drawCircle(kx, ky, 13f, jointGlowPaint)
+                        // Núcleo brillante
+                        jointCorePaint.color = Color.WHITE
+                        canvas.drawCircle(kx, ky, 5.5f, jointCorePaint)
                     }
                 }
             }
